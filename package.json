@@ -1,0 +1,15 @@
+{
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "typescript": "^5.9.3"
+  },
+  "workspaces": [
+    "shared",
+    "server",
+    "Portfolio"
+  ]
+}

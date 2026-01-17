@@ -1,0 +1,19 @@
+  
+POST http://localhost:3000/add
+Content-Type: application/json
+
+{
+
+    "title": "test",
+    "slug": "test-1",
+    "imageURI": "/", 
+    "date": "{{$datetime iso8601}}",
+    "catagories": ["none"], 
+    "elements": {
+        "type": "header",
+        "data": "helloworld"
+    }
+}
+
+###
+GET http://localhost:3000
