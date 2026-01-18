@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { type IArticle } from "@shared/article.model";
-import "./App.css";
 import axios from "axios";
+import "./index.css";
 
 function App() {
   const [articles, setArticles] = useState<IArticle[]>([]);
@@ -23,12 +23,31 @@ function App() {
 
   return (
     <>
-      <h1>test</h1>
-      {articles.map((article) => {
-        return <h1>{article.title}</h1>;
-      })}
+      <div className="flex flex-1 h-40 justify-center">
+        {articles.map((article) => {
+          return <ArticlePreview {...article}></ArticlePreview>;
+        })}
+      </div>
     </>
   );
 }
+
+const ArticlePreview: React.FC<IArticle> = ({
+  title,
+  slug,
+  imageURI,
+  date,
+  elements,
+}) => {
+  return (
+    <>
+      <div className="flex flex-1 flex-col border border-2 padding-50 items-top justify-left p-3">
+        <span>
+          <h1 className="text-m font-bold width-full">{title}</h1>
+        </span>
+      </div>
+    </>
+  );
+};
 
 export default App;
