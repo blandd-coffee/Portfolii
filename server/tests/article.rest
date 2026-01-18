@@ -1,11 +1,11 @@
   
-POST http://localhost:3000/add
+POST http://localhost:3000/article/add
 Content-Type: application/json
 
 {
 
-    "title": "test",
-    "slug": "test-1",
+    "title": "test2",
+    "slug": "test-2",
     "imageURI": "/", 
     "date": "{{$datetime iso8601}}",
     "catagories": ["none"], 
@@ -16,4 +16,4 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000
+GET http://localhost:3000/article
