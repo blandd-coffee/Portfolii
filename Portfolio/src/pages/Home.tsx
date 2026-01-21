@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import { type IArticle } from "@shared/article.model";
 import axios from "axios";
+import { Catagories } from "../components/Catagories";
 
 export const Home = () => {
   const [articles, setArticles] = useState<IArticle[]>([]);
@@ -17,15 +18,18 @@ export const Home = () => {
   }, []);
 
   return (
-    <div className="flex flex-wrap gap-3 justify-center p-3">
-      {articles.map((article) => {
-        return (
-          <Link key={article.slug} to={`/article/${article.slug}`}>
-            <ArticlePreview key={article.slug} {...article}></ArticlePreview>
-          </Link>
-        );
-      })}
-    </div>
+    <>
+      <Catagories></Catagories>
+      <div className="flex flex-wrap gap-3 justify-center p-3">
+        {articles.map((article) => {
+          return (
+            <Link key={article.slug} to={`/article/${article.slug}`}>
+              <ArticlePreview key={article.slug} {...article}></ArticlePreview>
+            </Link>
+          );
+        })}
+      </div>
+    </>
   );
 };
 

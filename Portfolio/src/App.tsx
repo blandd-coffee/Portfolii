@@ -1,21 +1,24 @@
-import { Route, Routes, Link, BrowserRouter as Router } from "react-router-dom";
+import { Route, Routes, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import "./index.css";
 import { ArticlePage } from "./pages/Article";
 import { Home } from "./pages/Home";
-import { NavBar } from "./components/NavBar";
+import { Layout } from "./components/Layout";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<NavBar />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/article/:slug" element={<ArticlePage />}></Route>
-        </Route>
-      </Routes>
-    </Router>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/2" element={<Home />} />
+
+        <Route path="/catagory/:name" element={<ArticlePage />}></Route>
+
+        <Route path="/article/:slug" element={<ArticlePage />}></Route>
+        <Route path="/article/:slug" element={<ArticlePage />}></Route>
+      </Route>
+    </Routes>
   );
 }
 

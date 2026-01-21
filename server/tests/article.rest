@@ -1,18 +1,36 @@
   
-POST http://localhost:3000/article/add
+POST http://localhost:3000/api/article/add
 Content-Type: application/json
 
 {
+  "title": "Mastering Modern Interfaces in 2026",
+  "slug": "mastering-modern-interfaces-2026",
+  "imageURI": "/assets/images/header-ui.png",
+  "date": "{{$datetime iso8601}}",
+  "catagories": ["Engineering", "Design Systems"],
+  "elements": [
 
-    "title": "test2",
-    "slug": "test-2",
-    "imageURI": "/", 
-    "date": "{{$datetime iso8601}}",
-    "catagories": ["none"], 
-    "elements": {
-        "type": "header",
-        "data": "helloworld"
+    {
+      "type": "subtitle",
+      "data": "How atomic design principles shaped the current year"
+    },
+    {
+      "type": "paragraph",
+      "data": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed efficitur, leo vel facilisis pellentesque, diam magna efficitur lectus, ut scelerisque enim tellus non ex."
+    },
+    {
+      "type": "image",
+      "data": "https://example.com/cdn/ui-diagram.jpg"
+    },
+    {
+      "type": "code",
+      "data": "export const Layout = ({ children }: { children: ReactNode }) => <main>{children}</main>;"
+    },
+    {
+      "type": "list",
+      "data": "• Lorem ipsum dolor sit amet • Consectetur adipiscing elit • Sed do eiusmod tempor"
     }
+  ]
 }
 
 ###

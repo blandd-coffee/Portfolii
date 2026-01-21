@@ -1,0 +1,11 @@
+
+POST http://localhost:3000/api/catagories/add
+Content-Type: application/json
+
+{
+  "name": "test3",
+  "imageURI": "/"
+}
+
+###
+GET http://localhost:3000/api/catagories

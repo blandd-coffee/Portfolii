@@ -15,9 +15,25 @@ export const ArticlePage = () => {
   }, []);
 
   return (
-    <div>
-      <h1>{article?.title}</h1>
-      <h1>{article?.elements[0].data}</h1>
+    <div className="min-w-min m-10 border bg-white">
+      <h1 className=" font-bold text-3xl p-3 pb-1">{article?.title}</h1>
+      {article?.elements.map((element) => {
+        if (element.type == "subtitle")
+          return (
+            <h1 className="text-2xl pl-3 pb-5 border-b">{element.data}</h1>
+          );
+        if (element.type == "header") return <h1>{element.data}</h1>;
+        if (element.type == "paragraph") return <p>{element.data}</p>;
+        if (element.type == "code")
+          return (
+            <div className="border-b border-t my-5 p-4 bg-slate-950 overflow-x-auto">
+              <pre className="font-mono text-green-400 text-sm leading-relaxed">
+                {element.data}
+              </pre>
+            </div>
+          );
+        if (element.type == "list") return <ul>{element.data}</ul>;
+      })}
     </div>
   );
 };

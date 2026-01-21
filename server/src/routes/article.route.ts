@@ -1,4 +1,4 @@
-import articleControllers from "../controllers/article.controllers.js";
+import articleControllers from "../controllers/article.controller.js";
 import { Router } from "express";
 const router = Router();
 router.get("/", articleControllers.getAllArticle);

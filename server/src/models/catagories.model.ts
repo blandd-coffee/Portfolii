@@ -1,13 +1,8 @@
 import { model, Schema } from "mongoose";
-
-export interface ICatagory {
-  name: string;
-  imageURI: string;
-}
-
+import { type ICatagory } from "../../../shared/catagories.model.js";
 const catagorySchema = new Schema<ICatagory>({
-  name: { type: String, required: true },
+  name: { type: String, required: true, unique: true },
   imageURI: { type: String, required: false },
 });
 
-export const catagory = model<ICatagory>("catagory", catagorySchema);
+export const Catagory = model<ICatagory>("catagory", catagorySchema);

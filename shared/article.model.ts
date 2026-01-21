@@ -1,7 +1,7 @@
 //Element (such as subtitle, header, bold, etc)
 
 export interface IElementBlock {
-  type: "subtitle" | "header" | "paragraph" | "code";
+  type: "subtitle" | "header" | "paragraph" | "image" | "code" | "list";
   data: string;
 }
 
