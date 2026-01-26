@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Article Creator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f5f5;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+      }
+
+      .editor {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        position: relative;
+      }
+
+      .editor h2 {
+        color: #333;
+        font-size: 1.3em;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #00bcd4;
+        padding-bottom: 10px;
+      }
+
+      .block {
+        margin-bottom: 20px;
+        padding: 12px;
+        border-radius: 4px;
+        cursor: text;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .block-content {
+        flex: 1;
+      }
+
+      .block-delete {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+
+      .block-delete:hover {
+        background: #c0392b;
+      }
+
+      .block:hover {
+        background: #f9f9f9;
+      }
+
+      .block:focus {
+        background: #f0f8ff;
+        outline: 2px solid #00bcd4;
+        outline-offset: -2px;
+      }
+
+      .block-content[data-type="subtitle"] {
+        font-size: 1.5em;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #00bcd4;
+        padding-bottom: 8px;
+      }
+
+      .block-content[data-type="header"] {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #34495e;
+        margin-top: 8px;
+      }
+
+      .block-content[data-type="paragraph"] {
+        font-size: 0.95em;
+        color: #555;
+        line-height: 1.6;
+      }
+
+      .block-content[data-type="code"] {
+        background: #2c3e50;
+        color: #00bcd4;
+        padding: 12px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85em;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .toolbar button {
+        padding: 8px 14px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+
+      .toolbar button:hover {
+        border-color: #00bcd4;
+        color: #00bcd4;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .panel {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      .panel h3 {
+        color: #333;
+        font-size: 1em;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #00bcd4;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"],
+      input[type="url"],
+      input[type="date"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 13px;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+      }
+
+      textarea {
+        resize: none;
+        min-height: 60px;
+      }
+
+      .category-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+      }
+
+      .category-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      .category-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+        font-weight: 400;
+      }
+
+      .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tag button {
+        background: none;
+        border: none;
+        color: #1976d2;
+        cursor: pointer;
+        font-size: 1.1em;
+        padding: 0;
+        line-height: 1;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+      }
+
+      .btn-primary {
+        background: #00bcd4;
+        color: white;
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        background: #0097a7;
+      }
+
+      .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+        width: 100%;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+
+      .status {
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        display: none;
+        font-size: 0.9em;
+      }
+
+      .status.success {
+        background: #c8e6c9;
+        color: #2e7d32;
+        display: block;
+      }
+
+      .status.error {
+        background: #ffcdd2;
+        color: #c62828;
+        display: block;
+      }
+
+      .loading {
+        text-align: center;
+        color: #999;
+        padding: 20px 0;
+      }
+
+      .error-text {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        .editor {
+          padding: 20px;
+        }
+      }
+
+      /* Slash Command Menu */
+      .slash-menu {
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 300px;
+        max-width: 450px;
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+      }
+
+      .slash-menu.active {
+        display: block;
+      }
+
+      .slash-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background 0.15s;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .slash-item:last-child {
+        border-bottom: none;
+      }
+
+      .slash-item:hover {
+        background: #f0f8ff;
+      }
+
+      .slash-item.selected {
+        background: #e3f2fd;
+      }
+
+      .slash-item-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .slash-item-desc {
+        font-size: 0.85em;
+        color: #999;
+        margin-bottom: 8px;
+      }
+
+      .slash-item-preview {
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.4;
+      }
+
+      .slash-item-preview.subtitle {
+        font-size: 1.5em;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #00bcd4;
+        padding-bottom: 8px;
+      }
+
+      .slash-item-preview.header {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #34495e;
+        margin-top: 8px;
+      }
+
+      .slash-item-preview.paragraph {
+        font-size: 0.95em;
+        color: #555;
+        line-height: 1.6;
+      }
+
+      .slash-item-preview.code {
+        background: #2c3e50;
+        color: #00bcd4;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Editor -->
+      <div class="editor">
+        <h2>Create Article</h2>
+
+        <div id="blocks"></div>
+
+        <!-- Slash Command Menu -->
+        <div id="slashMenu" class="slash-menu"></div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Article Info</h3>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="title" placeholder="Article title" />
+          </div>
+          <div class="form-group">
+            <label>Slug</label>
+            <input type="text" id="slug" placeholder="article-slug" />
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="url" id="imageURI" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="date" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Categories</h3>
+          <div id="categories" class="loading">Loading...</div>
+          <div id="selectedTags" class="selected-tags"></div>
+        </div>
+
+        <div class="panel">
+          <div id="status" class="status"></div>
+          <button class="btn-primary" onclick="publish()">📤 Publish</button>
+          <button
+            class="btn-secondary"
+            onclick="reset()"
+            style="margin-top: 10px"
+          >
+            🔄 Reset
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3000/api";
+      let blocks = [];
+      let blockId = 0;
+      let selectedCategories = [];
+      let allCategories = [];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setTodaysDate();
+        loadCategories();
+        addBlock("paragraph");
+      });
+
+      function setTodaysDate() {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").value = today;
+      }
+
+      async function loadCategories() {
+        try {
+          console.log("Fetching categories from:", `${API_URL}/catagories`);
+          const res = await fetch(`${API_URL}/catagories`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          console.log("Categories loaded:", data);
+          allCategories = Array.isArray(data) ? data : data.data || [];
+          if (allCategories.length === 0) {
+            document.getElementById("categories").innerHTML =
+              '<p style="color: #999;">No categories available</p>';
+          } else {
+            renderCategories();
+          }
+        } catch (error) {
+          console.error("Category fetch error:", error);
+          document.getElementById("categories").innerHTML =
+            `<div class="error-text">⚠️ Error: ${error.message}</div>`;
+        }
+      }
+
+      function renderCategories() {
+        const container = document.getElementById("categories");
+        container.innerHTML = allCategories
+          .map(
+            (cat) =>
+              `<div class="category-item">
+            <input type="checkbox" id="cat-${cat._id}" value="${cat._id}" onchange="updateCategories()">
+            <label for="cat-${cat._id}">${cat.name}</label>
+          </div>`,
+          )
+          .join("");
+      }
+
+      function updateCategories() {
+        const checked = document.querySelectorAll('input[id^="cat-"]:checked');
+        selectedCategories = Array.from(checked).map((cb) => cb.value);
+        renderTags();
+      }
+
+      function renderTags() {
+        const container = document.getElementById("selectedTags");
+        container.innerHTML = selectedCategories
+          .map((catId) => {
+            const cat = allCategories.find((c) => c._id === catId);
+            return `<div class="tag">${cat.name} <button type="button" onclick="removeTag('${catId}')">×</button></div>`;
+          })
+          .join("");
+      }
+
+      function removeTag(catId) {
+        document.getElementById(`cat-${catId}`).checked = false;
+        updateCategories();
+      }
+
+      function addBlock(type) {
+        const id = blockId++;
+        blocks.push({ id, type, content: "" });
+        renderBlocks();
+        setTimeout(() => {
+          const el = document.querySelector(`[data-id="${id}"]`);
+          if (el) el.focus();
+        }, 0);
+      }
+
+      function renderBlocks() {
+        const container = document.getElementById("blocks");
+        container.innerHTML = blocks
+          .map(
+            (block) =>
+              `<div class="block">
+            <div 
+              class="block-content" 
+              data-id="${block.id}" 
+              data-type="${block.type}"
+              contenteditable="true"
+              onblur="saveBlockContent(${block.id})"
+              onkeydown="handleBlockKeydown(event, ${block.id})"
+              onkeyup="handleBlockKeyup(event, ${block.id})"
+            >${escapeHtml(block.content)}</div>
+            <button type="button" class="block-delete" onclick="deleteBlock(${block.id})">Delete</button>
+          </div>`,
+          )
+          .join("");
+      }
+
+      function saveBlockContent(id) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        const block = blocks.find((b) => b.id === id);
+        if (el && block) {
+          block.content = el.innerText || "";
+        }
+      }
+
+      function deleteBlock(id) {
+        blocks = blocks.filter((b) => b.id !== id);
+        if (blocks.length === 0) addBlock("paragraph");
+        renderBlocks();
+      }
+
+      async function publish() {
+        const title = document.getElementById("title").value.trim();
+        const slug = document.getElementById("slug").value.trim();
+        const imageURI = document.getElementById("imageURI").value.trim();
+        const date = document.getElementById("date").value;
+
+        if (!title || !slug || !imageURI || !date) {
+          showStatus("Fill all fields", "error");
+          return;
+        }
+
+        const content = blocks
+          .filter((b) => b.content.trim())
+          .map((b) => ({ type: b.type, data: b.content }));
+        if (!content.length) {
+          showStatus("Add some content", "error");
+          return;
+        }
+
+        if (!selectedCategories.length) {
+          showStatus("Select a category", "error");
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_URL}/article/add`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              slug,
+              imageURI,
+              date: new Date(date).toISOString(),
+              catagories: selectedCategories,
+              elements: content,
+            }),
+          });
+
+          if (!res.ok) {
+            const error = await res.json().catch(() => ({}));
+            throw new Error(
+              error.message || error.error || "Failed to publish",
+            );
+          }
+          showStatus("✅ Published!", "success");
+          setTimeout(() => reset(), 1500);
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+          console.error(error);
+        }
+      }
+
+      function reset() {
+        document.getElementById("title").value = "";
+        document.getElementById("slug").value = "";
+        document.getElementById("imageURI").value = "";
+        setTodaysDate();
+        blocks = [];
+        blockId = 0;
+        selectedCategories = [];
+        document
+          .querySelectorAll('input[id^="cat-"]')
+          .forEach((cb) => (cb.checked = false));
+        renderTags();
+        addBlock("paragraph");
+        document.getElementById("status").className = "status";
+      }
+
+      function showStatus(msg, type) {
+        const el = document.getElementById("status");
+        el.textContent = msg;
+        el.className = `status ${type}`;
+        if (type === "success") {
+          setTimeout(() => {
+            el.className = "status";
+          }, 3000);
+        }
+      }
+
+      let currentSlashBlockId = null;
+
+      function handleBlockKeydown(event, id) {
+        if (event.key === "Escape") {
+          closeSlashMenu();
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          const menu = document.getElementById("slashMenu");
+          if (menu.classList.contains("active")) {
+            event.preventDefault();
+            navigateSlashMenu(event.key === "ArrowDown" ? 1 : -1);
+          }
+        }
+        if (event.key === "Enter") {
+          const menu = document.getElementById("slashMenu");
+          if (menu.classList.contains("active")) {
+            event.preventDefault();
+            selectSlashItem();
+          }
+        }
+      }
+
+      function handleBlockKeyup(event, id) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        const text = el.innerText;
+
+        if (text.startsWith("/")) {
+          currentSlashBlockId = id;
+          const query = text.substring(1).toLowerCase();
+          showSlashMenu(query, el);
+        } else {
+          closeSlashMenu();
+          // Save content when not showing menu
+          const block = blocks.find((b) => b.id === id);
+          if (block) {
+            block.content = text;
+          }
+        }
+      }
+
+      function showSlashMenu(query, blockEl) {
+        const commands = [
+          {
+            type: "subtitle",
+            name: "Subtitle",
+            desc: "Large heading text",
+            preview: "Article Title Here",
+          },
+          {
+            type: "header",
+            name: "Header",
+            desc: "Section heading",
+            preview: "Section Header",
+          },
+          {
+            type: "paragraph",
+            name: "Paragraph",
+            desc: "Regular text content",
+            preview: "Your paragraph text goes here...",
+          },
+          {
+            type: "code",
+            name: "Code",
+            desc: "Code snippet",
+            preview: "const hello = 'world';",
+          },
+        ];
+
+        const filtered = commands.filter(
+          (cmd) =>
+            cmd.name.toLowerCase().includes(query) ||
+            cmd.desc.toLowerCase().includes(query),
+        );
+
+        const menu = document.getElementById("slashMenu");
+        const rect = blockEl.getBoundingClientRect();
+
+        menu.innerHTML = filtered
+          .map(
+            (cmd, idx) =>
+              `<div class="slash-item" onclick="insertSlashCommand('${cmd.type}')">
+            <div class="slash-item-title">${cmd.name}</div>
+            <div class="slash-item-desc">${cmd.desc}</div>
+            <div class="slash-item-preview ${cmd.type}">${cmd.preview}</div>
+          </div>`,
+          )
+          .join("");
+
+        menu.style.top = rect.top + rect.height + 5 + "px";
+        menu.style.left = rect.left + "px";
+        menu.classList.add("active");
+      }
+
+      function closeSlashMenu() {
+        document.getElementById("slashMenu").classList.remove("active");
+        currentSlashBlockId = null;
+      }
+
+      function navigateSlashMenu(direction) {
+        const items = document.querySelectorAll(".slash-item");
+        const selected = document.querySelector(".slash-item.selected");
+        let index = Array.from(items).indexOf(selected);
+
+        if (index === -1) index = 0;
+        else index = (index + direction + items.length) % items.length;
+
+        items.forEach((item) => item.classList.remove("selected"));
+        items[index].classList.add("selected");
+      }
+
+      function selectSlashItem() {
+        const selected = document.querySelector(".slash-item.selected");
+        if (selected) {
+          selected.click();
+        }
+      }
+
+      function insertSlashCommand(type) {
+        if (currentSlashBlockId === null) return;
+
+        const block = blocks.find((b) => b.id === currentSlashBlockId);
+        if (block) {
+          block.type = type;
+          block.content = "";
+        }
+
+        closeSlashMenu();
+        renderBlocks();
+
+        setTimeout(() => {
+          const el = document.querySelector(
+            `[data-id="${currentSlashBlockId}"]`,
+          );
+          if (el) el.focus();
+        }, 0);
+      }
+
+      function escapeHtml(text) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        };
+        return text.replace(/[&<>"']/g, (m) => map[m]);
+      }
+    </script>
+  </body>
+</html>

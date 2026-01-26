@@ -10,6 +10,8 @@ export interface IArticle {
   slug: string;
   imageURI: string;
   date: Date;
-  catagories: Array<string>;
+  catagories: Array<any>; // ObjectId references to categories
   elements: IElementBlock[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

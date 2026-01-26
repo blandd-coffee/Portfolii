@@ -1,9 +1,9 @@
-import { Route, Routes, Link, BrowserRouter as Router } from "react-router-dom";
 import { useState, useEffect } from "react";
-
-import { type IArticle } from "@shared/article.model";
+import { Link } from "react-router-dom";
+import type { IArticle } from "@shared/article.model";
 import axios from "axios";
 import { Catagories } from "../components/Catagories";
+import { Card, CardContent, CardTitle } from "../components/ui/card";
 
 export const Home = () => {
   const [articles, setArticles] = useState<IArticle[]>([]);
@@ -11,39 +11,33 @@ export const Home = () => {
     const getArticles = async () => {
       const response = await axios.get("/api/article");
       setArticles(response.data);
-      console.log(JSON.stringify(articles, null, 2));
     };
-
     getArticles();
   }, []);
 
   return (
-    <>
-      <Catagories></Catagories>
-      <div className="flex flex-wrap gap-3 justify-center p-3">
-        {articles.map((article) => {
-          return (
-            <Link key={article.slug} to={`/article/${article.slug}`}>
-              <ArticlePreview key={article.slug} {...article}></ArticlePreview>
-            </Link>
-          );
-        })}
-      </div>
-    </>
+    <div className="flex flex-wrap gap-6 justify-center p-6">
+      {articles.map((article) => (
+        <Link key={article.slug} to={`/article/${article.slug}`}>
+          <ArticlePreview {...article} />
+        </Link>
+      ))}
+    </div>
   );
 };
 
-const ArticlePreview: React.FC<IArticle> = ({
-  title,
-  slug,
-  imageURI,
-  date,
-  elements,
-}) => {
+const ArticlePreview: React.FC<IArticle> = ({ title, elements }) => {
+  // Limit preview to 120 chars, add ellipsis if longer
+  const preview = elements[0]?.data || "";
+  const cutoff = 120;
+  const previewText =
+    preview.length > cutoff ? preview.slice(0, cutoff) + "..." : preview;
   return (
-    <div className="h-50 flex flex-col border-2 p-3 w-64">
-      <h1 className="text-m font-bold border-b">{title}</h1>
-      <p className="text-xs font-semibold mt-auto">{elements[0].data}</p>
-    </div>
+    <Card className="w-64 h-50 flex flex-col hover:shadow-lg transition-shadow">
+      <CardTitle className="p-4 border-b">{title}</CardTitle>
+      <CardContent className="flex-1 flex items-end">
+        <p className="text-sm text-gray-600">{previewText}</p>
+      </CardContent>
+    </Card>
   );
 };

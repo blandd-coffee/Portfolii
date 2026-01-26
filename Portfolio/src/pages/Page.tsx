@@ -1,28 +1,32 @@
-import type { IArticle } from "@shared/article.model";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
 
-export const ArticlePage = () => {
+export const Page = () => {
   const { slug } = useParams();
-  const [article, setArticle] = useState<IArticle>();
+  const [page, setPage] = useState<any>();
+
   useEffect(() => {
-    const fetchArticle = async () => {
-      const response = await axios.get("/api/article/" + slug);
-      setArticle(response.data);
+    const fetchPage = async () => {
+      try {
+        const response = await axios.get("/api/pages/" + slug);
+        setPage(response.data);
+      } catch (err) {
+        console.error("Failed to fetch page:", err);
+      }
     };
-    fetchArticle();
+    fetchPage();
   }, [slug]);
 
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardTitle className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100">
-          {article?.title}
+          {page?.title}
         </CardTitle>
         <CardContent className="prose prose-sm">
-          {article?.elements.map((element, idx) => {
+          {page?.elements.map((element: any, idx: number) => {
             if (element.type === "subtitle")
               return (
                 <h2

@@ -7,7 +7,7 @@ async function getAllArticle(req: Request, res: Response) {
     const articles = await Article.find();
     if (!articles[0])
       return res.status(404).json({ error: "Unable to find article" });
-    res.status(201).json(articles);
+    res.status(200).json(articles);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error!" });
@@ -19,7 +19,8 @@ async function getArticleBySlug(req: Request, res: Response) {
     const article = await Article.findOne({
       slug: req.params.slug as string,
     });
-    res.status(201).json(article);
+    if (!article) return res.status(404).json({ error: "Article not found" });
+    res.status(200).json(article);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error!" });
@@ -38,10 +39,11 @@ async function postArticle(req: Request, res: Response) {
       catagories,
       elements,
     });
-    article.save();
-    res.status(301).json({ status: "Success!" });
+    await article.save();
+    res.status(201).json({ status: "Success!", data: article });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
   }
 }
 
