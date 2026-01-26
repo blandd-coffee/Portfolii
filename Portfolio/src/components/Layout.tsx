@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "./ui/button";
@@ -13,6 +13,8 @@ interface IPage {
 
 export const Layout = () => {
   const [pages, setPages] = useState<IPage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -26,9 +28,32 @@ export const Layout = () => {
     fetchPages();
   }, []);
 
+  // Show loading bar on route change
+  useEffect(() => {
+    setLoading(true);
+    const timeout = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timeout);
+  }, [location]);
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <nav className="flex gap-3 rounded-2xl bg-white border border-cyan-200 p-3 shadow-md m-5 mb-0">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-cyan-50 via-white to-slate-100 relative overflow-x-hidden">
+      {/* Top loading bar */}
+      <div className="fixed top-0 left-0 w-full h-1 z-50 pointer-events-none">
+        <div
+          className={`h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-600 ease-out ${loading ? "w-full opacity-100" : "w-0 opacity-0"}`}
+          style={{ transitionProperty: "width, opacity" }}
+        />
+      </div>
+      {/* Decorative background elements */}
+      <div
+        className="pointer-events-none absolute -top-32 -left-32 w-[500px] h-[500px] bg-cyan-100 rounded-full opacity-30 blur-3xl animate-fade-in"
+        style={{ zIndex: 0 }}
+      />
+      <div
+        className="pointer-events-none absolute top-1/2 right-0 w-[400px] h-[400px] bg-cyan-200 rounded-full opacity-20 blur-2xl animate-fade-in"
+        style={{ zIndex: 0 }}
+      />
+      <nav className="flex gap-3 rounded-2xl bg-white border border-cyan-200 p-3 shadow-md m-5 mb-0 relative z-10">
         <NavLink to="/">
           {({ isActive }) => (
             <Button variant={isActive ? "default" : "ghost"}>Home</Button>
@@ -44,11 +69,19 @@ export const Layout = () => {
           </NavLink>
         ))}
       </nav>
-      <div className="flex flex-1 gap-5 p-5 pt-3">
-        <main className="flex-1">
-          <Outlet />
+      <div className="flex flex-1 gap-5 p-5 pt-3 relative z-10">
+        <main className="flex-1 min-h-0 flex flex-col">
+          <div
+            className="flex-1 overflow-y-auto custom-scrollbar transition-all duration-500"
+            style={{ opacity: loading ? 0.7 : 1 }}
+          >
+            <Outlet />
+          </div>
         </main>
-        <aside className="w-64 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 p-6 shadow-lg h-fit sticky top-5">
+        <aside
+          className="w-64 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 p-6 shadow-lg h-fit sticky top-5 transition-all duration-500"
+          style={{ opacity: loading ? 0.7 : 1 }}
+        >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Navigation
           </h3>
@@ -72,7 +105,10 @@ export const Layout = () => {
               )}
             </NavLink>
           </nav>
-          <Catagories />
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 mt-8">
+            Categories
+          </h3>
+          <Catagories sidebar />
         </aside>
       </div>
       <footer className="bg-slate-800 text-gray-200 py-8 px-5 mt-auto">

@@ -39,4 +39,24 @@ async function postCatagory(req: Request, res: Response) {
   }
 }
 
-export default { getAllCatagories, postCatagory };
+import { Article } from "../models/article.model.js";
+
+// Get articles by category name
+async function getArticlesByCatagoryName(req: Request, res: Response) {
+  try {
+    const name = req.params.name as string;
+    // Find the category by name
+    const cat = await Catagory.findOne({ name });
+    if (!cat) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+    // Find articles with this category's _id in their catagories array
+    const articles = await Article.find({ catagories: cat._id });
+    res.status(200).json(articles);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
+export default { getAllCatagories, postCatagory, getArticlesByCatagoryName };
