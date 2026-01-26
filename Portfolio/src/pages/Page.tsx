@@ -19,6 +19,26 @@ export const Page = () => {
     fetchPage();
   }, [slug]);
 
+  // If page has a PDF file, display it as full-page viewer
+  if (page?.pdfFile) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardTitle className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100">
+            {page?.title}
+          </CardTitle>
+          <CardContent className="p-6">
+            <iframe
+              src={`${page.pdfFile}#toolbar=1`}
+              className="w-full h-screen rounded-lg border border-cyan-200"
+              title={page?.title}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
@@ -26,7 +46,7 @@ export const Page = () => {
           {page?.title}
         </CardTitle>
         <CardContent className="prose prose-sm">
-          {page?.elements.map((element: any, idx: number) => {
+          {page?.elements?.map((element: any, idx: number) => {
             if (element.type === "subtitle")
               return (
                 <h2

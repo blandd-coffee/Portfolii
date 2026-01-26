@@ -31,10 +31,33 @@ async function getPageBySlug(req: Request, res: Response) {
   }
 }
 
+async function getPageById(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    const page = await Page.findById(id);
+    if (!page) {
+      return res.status(404).json({ error: "Page not found" });
+    }
+    res.status(200).json(page);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
 async function postPage(req: Request, res: Response) {
   try {
     const { title, slug, imageURI, order, elements }: IPage = req.body;
-    const page = new Page({ title, slug, imageURI, order, elements });
+    const pdfFile = (req as any).file ? (req as any).file.path : undefined;
+
+    const page = new Page({
+      title,
+      slug,
+      imageURI: imageURI || null,
+      pdfFile: pdfFile || null,
+      order,
+      elements: elements || [],
+    });
     await page.save();
 
     res.status(201).json({ status: "Success!", data: page });
@@ -46,16 +69,15 @@ async function postPage(req: Request, res: Response) {
 
 async function updatePage(req: Request, res: Response) {
   try {
-    const slug = Array.isArray(req.params.slug)
-      ? req.params.slug[0]
-      : req.params.slug;
-    if (!slug) {
-      return res.status(400).json({ error: "Slug is required" });
-    }
+    const id = req.params.id;
     const updates: Partial<IPage> = req.body;
-    const page = await Page.findOneAndUpdate({ slug } as any, updates, {
-      new: true,
-    });
+
+    // Handle file upload
+    if ((req as any).file) {
+      updates.pdfFile = (req as any).file.path;
+    }
+
+    const page = await Page.findByIdAndUpdate(id, updates, { new: true });
     if (!page) {
       return res.status(404).json({ error: "Page not found" });
     }
@@ -68,13 +90,8 @@ async function updatePage(req: Request, res: Response) {
 
 async function deletePage(req: Request, res: Response) {
   try {
-    const slug = Array.isArray(req.params.slug)
-      ? req.params.slug[0]
-      : req.params.slug;
-    if (!slug) {
-      return res.status(400).json({ error: "Slug is required" });
-    }
-    const page = await Page.findOneAndDelete({ slug } as any);
+    const id = req.params.id;
+    const page = await Page.findByIdAndDelete(id);
     if (!page) {
       return res.status(404).json({ error: "Page not found" });
     }

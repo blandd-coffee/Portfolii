@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Create/Edit Articles & Pages</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f5f5;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        color: #00bcd4;
+        font-size: 1.8em;
+      }
+
+      .mode-selector {
+        display: flex;
+        gap: 10px;
+      }
+
+      .mode-btn {
+        padding: 10px 20px;
+        border: 2px solid #00bcd4;
+        background: white;
+        color: #00bcd4;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+
+      .mode-btn.active {
+        background: #00bcd4;
+        color: white;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 20px;
+      }
+
+      .editor-section,
+      .sidebar-section {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .editor-section h2 {
+        color: #333;
+        font-size: 1.3em;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #00bcd4;
+        padding-bottom: 10px;
+      }
+
+      .sidebar-section h3 {
+        color: #333;
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        font-size: 0.9em;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.95em;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.1);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .category-list,
+      .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .category-item,
+      .item-select {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        background: #f9f9f9;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .category-item:hover,
+      .item-select:hover {
+        background: #f0f0f0;
+      }
+
+      .category-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+        cursor: pointer;
+      }
+
+      .category-item label {
+        margin: 0;
+        cursor: pointer;
+        flex: 1;
+        font-weight: 400;
+        font-size: 0.9em;
+      }
+
+      .item-select {
+        justify-content: space-between;
+        padding: 10px;
+      }
+
+      .item-select button {
+        background: #00bcd4;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.85em;
+      }
+
+      .selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tag button {
+        background: none;
+        border: none;
+        color: #1976d2;
+        cursor: pointer;
+        font-size: 1.1em;
+        padding: 0;
+        line-height: 1;
+      }
+
+      .block {
+        margin-bottom: 20px;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .block:hover {
+        background: #f9f9f9;
+      }
+
+      .block-content {
+        flex: 1;
+        padding: 8px;
+        min-height: 30px;
+        border-radius: 3px;
+        outline: none;
+      }
+
+      .block-content[contenteditable]:focus {
+        background: #f0f8ff;
+        box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+      }
+
+      .block-delete {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .block-delete:hover {
+        background: #c0392b;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+      }
+
+      .btn-primary {
+        background: #00bcd4;
+        color: white;
+        flex: 1;
+      }
+
+      .btn-primary:hover {
+        background: #0097a7;
+      }
+
+      .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+        flex: 1;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+
+      .btn-add {
+        background: #4caf50;
+        color: white;
+        padding: 8px 15px;
+      }
+
+      .btn-add:hover {
+        background: #45a049;
+      }
+
+      .status {
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        display: none;
+        font-size: 0.9em;
+      }
+
+      .status.success {
+        background: #c8e6c9;
+        color: #2e7d32;
+        display: block;
+      }
+
+      .status.error {
+        background: #ffcdd2;
+        color: #c62828;
+        display: block;
+      }
+
+      .loading {
+        text-align: center;
+        color: #999;
+        padding: 20px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .file-upload {
+        position: relative;
+      }
+
+      .file-upload input[type="file"] {
+        display: none;
+      }
+
+      .file-upload-label {
+        display: block;
+        padding: 10px;
+        background: #f0f0f0;
+        border: 2px dashed #00bcd4;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .file-upload-label:hover {
+        background: #e8f4f8;
+      }
+
+      .file-name {
+        margin-top: 8px;
+        color: #666;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📝 Admin Panel</h1>
+        <div class="mode-selector">
+          <button class="mode-btn active" onclick="switchMode('article')">
+            📰 Article
+          </button>
+          <button class="mode-btn" onclick="switchMode('page')">📄 Page</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Editor -->
+        <div class="editor-section">
+          <h2 id="editorTitle">Create New Article</h2>
+
+          <div id="status" class="status"></div>
+
+          <!-- Edit/Create Selector -->
+          <div class="form-group" id="editSelector" style="display: none">
+            <label>Select to Edit</label>
+            <select id="itemSelect" onchange="loadItem()">
+              <option value="">-- Create New --</option>
+            </select>
+          </div>
+
+          <!-- Article/Page Fields -->
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="title" placeholder="Title" />
+          </div>
+
+          <div class="form-group">
+            <label>Slug</label>
+            <input type="text" id="slug" placeholder="url-slug" />
+          </div>
+
+          <div id="articleFields">
+            <div class="form-group">
+              <label>Image URL</label>
+              <input type="url" id="imageURI" placeholder="https://..." />
+            </div>
+
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="date" />
+            </div>
+          </div>
+
+          <div id="pageFields" style="display: none">
+            <div class="form-group">
+              <label>Order (for navbar)</label>
+              <input type="number" id="order" placeholder="0" />
+            </div>
+
+            <div class="form-group">
+              <label>Image URL</label>
+              <input type="url" id="pageImageURI" placeholder="https://..." />
+            </div>
+
+            <div class="form-group file-upload">
+              <label for="pdfFile" class="file-upload-label">
+                📎 Upload PDF (optional)
+              </label>
+              <input type="file" id="pdfFile" accept=".pdf" />
+              <div id="fileName" class="file-name"></div>
+            </div>
+          </div>
+
+          <div id="blocksContainer" class="hidden">
+            <h3 style="margin-top: 20px">Content</h3>
+            <div id="blocks"></div>
+            <button class="btn-add" onclick="addBlock('paragraph')">
+              + Add Block
+            </button>
+          </div>
+
+          <div class="buttons">
+            <button class="btn-primary" onclick="publish()">📤 Publish</button>
+            <button class="btn-secondary" onclick="reset()">🔄 Reset</button>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar-section">
+          <div id="articleSidebar">
+            <h3>Categories</h3>
+            <div id="categories" class="category-list loading">Loading...</div>
+            <div id="selectedTags" class="selected-tags"></div>
+          </div>
+
+          <div id="pageSidebar" style="display: none">
+            <h3>Existing Pages</h3>
+            <div id="pagesList" class="item-list loading">Loading...</div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3000/api";
+      let currentMode = "article";
+      let blocks = [];
+      let blockId = 0;
+      let selectedCategories = [];
+      let allCategories = [];
+      let currentItemId = null;
+      let selectedPdfFile = null;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setTodaysDate();
+        loadCategories();
+        loadExistingItems();
+        setupPdfUpload();
+      });
+
+      function switchMode(mode) {
+        currentMode = mode;
+        document
+          .querySelectorAll(".mode-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        reset();
+        setTodaysDate();
+        loadExistingItems();
+
+        if (mode === "article") {
+          document.getElementById("editorTitle").textContent =
+            "Create New Article";
+          document.getElementById("articleFields").style.display = "block";
+          document.getElementById("pageFields").style.display = "none";
+          document.getElementById("articleSidebar").style.display = "block";
+          document.getElementById("pageSidebar").style.display = "none";
+          document.getElementById("blocksContainer").classList.remove("hidden");
+          addBlock("paragraph");
+        } else {
+          document.getElementById("editorTitle").textContent =
+            "Create New Page";
+          document.getElementById("articleFields").style.display = "none";
+          document.getElementById("pageFields").style.display = "block";
+          document.getElementById("articleSidebar").style.display = "none";
+          document.getElementById("pageSidebar").style.display = "block";
+          document.getElementById("blocksContainer").classList.remove("hidden");
+          addBlock("paragraph");
+        }
+      }
+
+      function setupPdfUpload() {
+        const input = document.getElementById("pdfFile");
+        input.addEventListener("change", (e) => {
+          selectedPdfFile = e.target.files[0];
+          document.getElementById("fileName").textContent = selectedPdfFile
+            ? `Selected: ${selectedPdfFile.name}`
+            : "";
+        });
+      }
+
+      function setTodaysDate() {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").value = today;
+      }
+
+      async function loadCategories() {
+        try {
+          const res = await fetch(`${API_URL}/catagories`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          allCategories = Array.isArray(data) ? data : [];
+          renderCategories();
+        } catch (error) {
+          console.error("Category fetch error:", error);
+          document.getElementById("categories").innerHTML =
+            `<div style="color: #e74c3c;">Error loading categories</div>`;
+        }
+      }
+
+      function renderCategories() {
+        const container = document.getElementById("categories");
+        container.innerHTML = allCategories
+          .map(
+            (cat) =>
+              `<div class="category-item">
+            <input type="checkbox" id="cat-${cat._id}" value="${cat._id}" onchange="toggleCategory('${cat._id}', '${cat.name}')">
+            <label for="cat-${cat._id}">${cat.name}</label>
+          </div>`,
+          )
+          .join("");
+      }
+
+      function toggleCategory(id, name) {
+        const checkbox = document.getElementById(`cat-${id}`);
+        if (checkbox.checked) {
+          if (!selectedCategories.includes(id)) {
+            selectedCategories.push(id);
+          }
+        } else {
+          selectedCategories = selectedCategories.filter((c) => c !== id);
+        }
+        renderTags();
+      }
+
+      function renderTags() {
+        const container = document.getElementById("selectedTags");
+        container.innerHTML = selectedCategories
+          .map((catId) => {
+            const cat = allCategories.find((c) => c._id === catId);
+            return `<div class="tag">
+            ${cat?.name}
+            <button onclick="toggleCategory('${catId}', '')">✕</button>
+          </div>`;
+          })
+          .join("");
+      }
+
+      async function loadExistingItems() {
+        const endpoint = currentMode === "article" ? "article" : "pages";
+        try {
+          const res = await fetch(`${API_URL}/${endpoint}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : [];
+
+          const select = document.getElementById("itemSelect");
+          const itemsList = document.getElementById("pagesList");
+
+          if (currentMode === "article") {
+            select.innerHTML =
+              '<option value="">-- Create New --</option>' +
+              items
+                .map(
+                  (item) =>
+                    `<option value="${item._id}">${item.title}</option>`,
+                )
+                .join("");
+            document.getElementById("editSelector").style.display = "block";
+          } else {
+            itemsList.innerHTML =
+              items.length === 0
+                ? "<p style='color: #999;'>No pages yet</p>"
+                : items
+                    .map(
+                      (item) =>
+                        `<div class="item-select">
+                    <span>${item.title}</span>
+                    <button onclick="loadPageItem('${item._id}')">Edit</button>
+                  </div>`,
+                    )
+                    .join("");
+          }
+        } catch (error) {
+          console.error("Load items error:", error);
+        }
+      }
+
+      async function loadItem() {
+        const select = document.getElementById("itemSelect");
+        const id = select.value;
+
+        if (!id) {
+          reset();
+          return;
+        }
+
+        try {
+          const endpoint =
+            currentMode === "article" ? `article?slug=${id}` : `pages/${id}`;
+          const res = await fetch(`${API_URL}/${endpoint}`);
+          if (!res.ok) throw new Error("Item not found");
+          const item = await res.json();
+
+          currentItemId = item._id;
+          document.getElementById("title").value = item.title;
+          document.getElementById("slug").value = item.slug;
+          document.getElementById("imageURI").value = item.imageURI || "";
+
+          if (currentMode === "article") {
+            document.getElementById("date").value =
+              item.date?.split("T")[0] || "";
+            selectedCategories = item.catagories || [];
+            renderTags();
+            allCategories.forEach((cat) => {
+              const checkbox = document.getElementById(`cat-${cat._id}`);
+              if (checkbox) {
+                checkbox.checked = selectedCategories.includes(cat._id);
+              }
+            });
+          } else {
+            document.getElementById("order").value = item.order || 0;
+            document.getElementById("pageImageURI").value = item.imageURI || "";
+          }
+
+          blocks = (item.elements || []).map((el, idx) => ({
+            id: idx,
+            type: el.type,
+            content: el.data,
+          }));
+          blockId = blocks.length;
+          renderBlocks();
+        } catch (error) {
+          showStatus(`Error loading item: ${error.message}`, "error");
+        }
+      }
+
+      async function loadPageItem(id) {
+        try {
+          const res = await fetch(`${API_URL}/pages/${id}`);
+          if (!res.ok) throw new Error("Page not found");
+          const item = await res.json();
+
+          currentItemId = item._id;
+          document.getElementById("title").value = item.title;
+          document.getElementById("slug").value = item.slug;
+          document.getElementById("order").value = item.order || 0;
+          document.getElementById("pageImageURI").value = item.imageURI || "";
+
+          blocks = (item.elements || []).map((el, idx) => ({
+            id: idx,
+            type: el.type,
+            content: el.data,
+          }));
+          blockId = blocks.length;
+          renderBlocks();
+        } catch (error) {
+          showStatus(`Error loading page: ${error.message}`, "error");
+        }
+      }
+
+      function addBlock(type) {
+        blocks.push({
+          id: blockId++,
+          type: type,
+          content: "",
+        });
+        renderBlocks();
+      }
+
+      function deleteBlock(id) {
+        blocks = blocks.filter((b) => b.id !== id);
+        renderBlocks();
+      }
+
+      function updateBlockContent(id, content) {
+        const block = blocks.find((b) => b.id === id);
+        if (block) {
+          block.content = content;
+        }
+      }
+
+      function renderBlocks() {
+        const container = document.getElementById("blocks");
+        container.innerHTML = blocks
+          .map(
+            (block) =>
+              `<div class="block">
+            <div class="block-content" contenteditable="true" data-id="${block.id}" 
+              onblur="updateBlockContent(${block.id}, this.innerText)">${escapeHtml(block.content)}</div>
+            <button class="block-delete" onclick="deleteBlock(${block.id})">Delete</button>
+          </div>`,
+          )
+          .join("");
+      }
+
+      async function publish() {
+        const title = document.getElementById("title").value.trim();
+        const slug = document.getElementById("slug").value.trim();
+
+        if (!title || !slug) {
+          showStatus("Title and slug are required", "error");
+          return;
+        }
+
+        const content = blocks.map((b) => ({
+          type: b.type,
+          data: b.content,
+        }));
+
+        try {
+          if (currentMode === "article") {
+            if (!selectedCategories.length) {
+              showStatus("Select at least one category", "error");
+              return;
+            }
+
+            const imageURI =
+              document.getElementById("imageURI").value.trim() || null;
+            const date = document.getElementById("date").value;
+
+            const method = currentItemId ? "PUT" : "POST";
+            const endpoint = currentItemId
+              ? `article/${currentItemId}`
+              : "article/add";
+
+            const res = await fetch(`${API_URL}/${endpoint}`, {
+              method: method,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title,
+                slug,
+                imageURI,
+                date,
+                catagories: selectedCategories,
+                elements: content,
+              }),
+            });
+
+            if (!res.ok) {
+              const error = await res.json().catch(() => ({}));
+              throw new Error(error.error || "Failed to publish");
+            }
+
+            showStatus(
+              currentItemId ? "✅ Article updated!" : "✅ Article published!",
+              "success",
+            );
+          } else {
+            // Page mode
+            const order = parseInt(document.getElementById("order").value) || 0;
+            const pageImageURI =
+              document.getElementById("pageImageURI").value.trim() || null;
+
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("slug", slug);
+            formData.append("order", order);
+            if (pageImageURI) formData.append("imageURI", pageImageURI);
+            formData.append(
+              "elements",
+              JSON.stringify(
+                content.length > 0
+                  ? content
+                  : [{ type: "paragraph", data: "" }],
+              ),
+            );
+            if (selectedPdfFile) {
+              formData.append("pdfFile", selectedPdfFile);
+            }
+
+            const method = currentItemId ? "PUT" : "POST";
+            const endpoint = currentItemId
+              ? `pages/${currentItemId}`
+              : "pages/add";
+
+            const res = await fetch(`${API_URL}/${endpoint}`, {
+              method: method,
+              body: formData,
+            });
+
+            if (!res.ok) {
+              const error = await res.json().catch(() => ({}));
+              throw new Error(error.error || "Failed to publish");
+            }
+
+            showStatus(
+              currentItemId ? "✅ Page updated!" : "✅ Page created!",
+              "success",
+            );
+          }
+
+          setTimeout(() => {
+            reset();
+            loadExistingItems();
+          }, 1000);
+        } catch (error) {
+          showStatus(`Error: ${error.message}`, "error");
+          console.error(error);
+        }
+      }
+
+      function reset() {
+        document.getElementById("title").value = "";
+        document.getElementById("slug").value = "";
+        document.getElementById("imageURI").value = "";
+        document.getElementById("pageImageURI").value = "";
+        document.getElementById("order").value = "0";
+        document.getElementById("pdfFile").value = "";
+        document.getElementById("fileName").textContent = "";
+        setTodaysDate();
+        blocks = [];
+        blockId = 0;
+        selectedCategories = [];
+        currentItemId = null;
+        selectedPdfFile = null;
+        document
+          .querySelectorAll('input[id^="cat-"]')
+          .forEach((cb) => (cb.checked = false));
+        renderTags();
+        renderBlocks();
+        document.getElementById("itemSelect").value = "";
+        document.getElementById("status").className = "status";
+      }
+
+      function showStatus(msg, type) {
+        const el = document.getElementById("status");
+        el.textContent = msg;
+        el.className = `status ${type}`;
+        if (type === "success") {
+          setTimeout(() => {
+            el.className = "status";
+          }, 3000);
+        }
+      }
+
+      function escapeHtml(text) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        };
+        return text.replace(/[&<>"']/g, (m) => map[m]);
+      }
+    </script>
+  </body>
+</html>

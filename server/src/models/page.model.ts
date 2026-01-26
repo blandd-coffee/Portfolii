@@ -9,9 +9,10 @@ const elementBlockSchema = new Schema({
 const pageSchema = new Schema<IPage>({
   title: { type: String, required: true, unique: true },
   slug: { type: String, required: true, unique: true },
-  imageURI: { type: String, required: true },
+  imageURI: { type: String, default: null },
+  pdfFile: { type: String, default: null },
   order: { type: Number, default: 0 },
-  elements: { type: [elementBlockSchema], required: true },
+  elements: { type: [elementBlockSchema], default: [] },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

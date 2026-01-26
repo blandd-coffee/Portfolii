@@ -47,8 +47,41 @@ async function postArticle(req: Request, res: Response) {
   }
 }
 
+async function updateArticle(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string;
+    const updates = req.body;
+    const article = await Article.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+    res.status(200).json({ status: "Success!", data: article });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
+async function deleteArticle(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string;
+    const article = await Article.findByIdAndDelete(id);
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+    res.status(200).json({ status: "Success!", message: "Article deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
 export default {
   getAllArticle,
   getArticleBySlug,
   postArticle,
+  updateArticle,
+  deleteArticle,
 };
