@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node build/server/src/app.js",
-    "dev": "nodemon --watch src --watch ../shared --ext ts --exec \"npm run build && npm run start\""
+    "dev": "nodemon --watch src --watch ../shared --ext ts --exec \"npm run build && npm run start\"",
+    "seed": "npx ts-node src/seed.ts"
   },
   "keywords": [],
   "author": "",

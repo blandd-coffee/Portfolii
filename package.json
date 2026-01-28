@@ -1,10 +1,14 @@
 {
   "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=Portfolio\""
+  },
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/node": "^25.0.9",
+    "concurrently": "^9.1.0",
     "typescript": "^5.9.3"
   },
   "workspaces": [

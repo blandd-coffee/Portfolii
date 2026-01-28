@@ -48,7 +48,24 @@ async function getPageById(req: Request, res: Response) {
 async function postPage(req: Request, res: Response) {
   try {
     const { title, slug, imageURI, order, elements }: IPage = req.body;
-    const pdfFile = (req as any).file ? (req as any).file.path : undefined;
+    let pdfFile = (req as any).file ? (req as any).file.filename : undefined;
+
+    // Ensure we only store the filename, not the path
+    if (pdfFile && pdfFile.includes("/")) {
+      pdfFile = pdfFile.split("/").pop();
+    }
+    if (pdfFile && pdfFile.includes("\\")) {
+      pdfFile = pdfFile.split("\\").pop();
+    }
+
+    let parsedElements = elements;
+    if (typeof elements === "string") {
+      try {
+        parsedElements = JSON.parse(elements);
+      } catch (e) {
+        parsedElements = [];
+      }
+    }
 
     const page = new Page({
       title,
@@ -56,7 +73,7 @@ async function postPage(req: Request, res: Response) {
       imageURI: imageURI || null,
       pdfFile: pdfFile || null,
       order,
-      elements: elements || [],
+      elements: parsedElements || [],
     });
     await page.save();
 
@@ -74,7 +91,24 @@ async function updatePage(req: Request, res: Response) {
 
     // Handle file upload
     if ((req as any).file) {
-      updates.pdfFile = (req as any).file.path;
+      let pdfFile = (req as any).file.filename;
+      // Ensure we only store the filename, not the path
+      if (pdfFile.includes("/")) {
+        pdfFile = pdfFile.split("/").pop() || pdfFile;
+      }
+      if (pdfFile.includes("\\")) {
+        pdfFile = pdfFile.split("\\").pop() || pdfFile;
+      }
+      updates.pdfFile = pdfFile;
+    }
+
+    // Parse elements if it's a string
+    if (typeof updates.elements === "string") {
+      try {
+        updates.elements = JSON.parse(updates.elements);
+      } catch (e) {
+        updates.elements = [];
+      }
     }
 
     const page = await Page.findByIdAndUpdate(id, updates, { new: true });
@@ -102,4 +136,11 @@ async function deletePage(req: Request, res: Response) {
   }
 }
 
-export default { getAllPages, getPageBySlug, postPage, updatePage, deletePage };
+export default {
+  getAllPages,
+  getPageBySlug,
+  getPageById,
+  postPage,
+  updatePage,
+  deletePage,
+};

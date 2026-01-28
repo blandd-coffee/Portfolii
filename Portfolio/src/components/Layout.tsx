@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../tools/axiosConfigs";
 import { Button } from "./ui/button";
 import { Catagories } from "./Catagories";
 
@@ -19,7 +19,7 @@ export const Layout = () => {
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await axios.get("/api/pages");
+        const response = await axiosInstance.get("/pages");
         setPages(response.data);
       } catch (err) {
         console.error("Failed to fetch pages:", err);

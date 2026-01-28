@@ -3,6 +3,7 @@ import { Router } from "express";
 const router = Router();
 router.get("/", articleControllers.getAllArticle);
 router.get("/:slug", articleControllers.getArticleBySlug);
+router.get("/id/:id", articleControllers.getArticleById);
 router.post("/add", articleControllers.postArticle);
 router.put("/:id", articleControllers.updateArticle);
 router.delete("/:id", articleControllers.deleteArticle);

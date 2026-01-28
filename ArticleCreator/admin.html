@@ -625,7 +625,7 @@
 
         try {
           const endpoint =
-            currentMode === "article" ? `article?slug=${id}` : `pages/${id}`;
+            currentMode === "article" ? `article/id/${id}` : `pages/${id}`;
           const res = await fetch(`${API_URL}/${endpoint}`);
           if (!res.ok) throw new Error("Item not found");
           const item = await res.json();

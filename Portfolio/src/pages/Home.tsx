@@ -1,27 +1,57 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import type { IArticle } from "@shared/article.model";
-import axios from "axios";
-import { Catagories } from "../components/Catagories";
+import axiosInstance from "../tools/axiosConfigs";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
 
 export const Home = () => {
   const [articles, setArticles] = useState<IArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const getArticles = async () => {
-      const response = await axios.get("/api/article");
-      setArticles(response.data);
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await axiosInstance.get("/article");
+        setArticles(response.data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load articles",
+        );
+        console.error("Error fetching articles:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     getArticles();
   }, []);
 
   return (
     <div className="flex flex-wrap gap-6 justify-center p-6">
-      {articles.map((article) => (
-        <Link key={article.slug} to={`/article/${article.slug}`}>
-          <ArticlePreview {...article} />
-        </Link>
-      ))}
+      {loading && (
+        <div className="text-center w-full py-8 text-gray-500">
+          Loading articles...
+        </div>
+      )}
+      {error && (
+        <div className="text-center w-full py-8 text-red-500">
+          Error: {error}
+        </div>
+      )}
+      {!loading && !error && articles.length === 0 && (
+        <div className="text-center w-full py-8 text-gray-500">
+          No articles found
+        </div>
+      )}
+      {!loading &&
+        !error &&
+        articles.map((article) => (
+          <Link key={article.slug} to={`/article/${article.slug}`}>
+            <ArticlePreview {...article} />
+          </Link>
+        ))}
     </div>
   );
 };

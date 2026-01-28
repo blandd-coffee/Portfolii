@@ -7,13 +7,13 @@ const elementBlockSchema = new Schema({
 });
 
 const pageSchema = new Schema<IPage>({
-  title: { type: String, required: true, unique: true },
-  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true, index: true },
+  slug: { type: String, required: true, unique: true, index: true },
   imageURI: { type: String, default: null },
   pdfFile: { type: String, default: null },
-  order: { type: Number, default: 0 },
+  order: { type: Number, default: 0, index: true },
   elements: { type: [elementBlockSchema], default: [] },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now },
 });
 

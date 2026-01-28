@@ -3,806 +3,1306 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Article Creator</title>
+    <title>Content Manager</title>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      :root {
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --accent: #2563eb;
+        --accent-weak: rgba(37, 99, 235, 0.12);
+        --danger: #ef4444;
+        --success: #16a34a;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+        --radius: 14px;
       }
 
+      * {
+        box-sizing: border-box;
+      }
+      html,
       body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
         font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: #f5f5f5;
-        min-height: 100vh;
-        padding: 20px;
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          "Noto Sans",
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--text);
+        padding: 24px;
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 980px;
         margin: 0 auto;
-        display: grid;
-        grid-template-columns: 1fr 300px;
-        gap: 20px;
       }
 
-      .editor {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 40px;
-        position: relative;
-      }
-
-      .editor h2 {
-        color: #333;
-        font-size: 1.3em;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #00bcd4;
-        padding-bottom: 10px;
-      }
-
-      .block {
-        margin-bottom: 20px;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: text;
-        transition: all 0.2s;
+      header {
         display: flex;
+        align-items: baseline;
         justify-content: space-between;
-        align-items: flex-start;
-        gap: 10px;
+        gap: 16px;
+        margin-bottom: 18px;
       }
-
-      .block-content {
-        flex: 1;
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: -0.01em;
       }
-
-      .block-delete {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 4px 8px;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 12px;
-        flex-shrink: 0;
-      }
-
-      .block-delete:hover {
-        background: #c0392b;
-      }
-
-      .block:hover {
-        background: #f9f9f9;
-      }
-
-      .block:focus {
-        background: #f0f8ff;
-        outline: 2px solid #00bcd4;
-        outline-offset: -2px;
-      }
-
-      .block-content[data-type="subtitle"] {
-        font-size: 1.5em;
-        font-weight: 600;
-        color: #2c3e50;
-        border-bottom: 2px solid #00bcd4;
-        padding-bottom: 8px;
-      }
-
-      .block-content[data-type="header"] {
-        font-size: 1.2em;
-        font-weight: 600;
-        color: #34495e;
-        margin-top: 8px;
-      }
-
-      .block-content[data-type="paragraph"] {
-        font-size: 0.95em;
-        color: #555;
-        line-height: 1.6;
-      }
-
-      .block-content[data-type="code"] {
-        background: #2c3e50;
-        color: #00bcd4;
-        padding: 12px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 0.85em;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-      }
-
-      .toolbar {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 30px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #e0e0e0;
-      }
-
-      .toolbar button {
-        padding: 8px 14px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
+      .subtitle {
         font-size: 13px;
-        transition: all 0.2s;
+        color: var(--muted);
       }
 
-      .toolbar button:hover {
-        border-color: #00bcd4;
-        color: #00bcd4;
+      .tabs {
+        display: inline-flex;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--panel);
+        padding: 4px;
+        gap: 4px;
       }
-
-      .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      .tab-btn {
+        border: 0;
+        background: transparent;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--muted);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .tab-btn.active {
+        background: var(--accent-weak);
+        color: var(--accent);
       }
 
       .panel {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 18px;
       }
 
-      .panel h3 {
-        color: #333;
-        font-size: 1em;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #00bcd4;
-        padding-bottom: 10px;
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 820px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       .form-group {
-        margin-bottom: 15px;
-      }
-
-      .form-group label {
-        display: block;
-        color: #333;
-        font-weight: 600;
-        font-size: 0.9em;
-        margin-bottom: 6px;
-      }
-
-      input[type="text"],
-      input[type="url"],
-      input[type="date"],
-      textarea,
-      select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-family: inherit;
-        font-size: 13px;
-      }
-
-      input:focus,
-      textarea:focus,
-      select:focus {
-        outline: none;
-        border-color: #00bcd4;
-        box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
-      }
-
-      textarea {
-        resize: none;
-        min-height: 60px;
-      }
-
-      .category-item {
         display: flex;
-        align-items: center;
-        padding: 8px 0;
-      }
-
-      .category-item input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        margin-right: 10px;
-        cursor: pointer;
-      }
-
-      .category-item label {
-        margin: 0;
-        cursor: pointer;
-        flex: 1;
-        font-weight: 400;
-      }
-
-      .selected-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-      }
-
-      .tag {
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 5px 10px;
-        border-radius: 12px;
-        font-size: 0.85em;
-        display: inline-flex;
-        align-items: center;
+        flex-direction: column;
         gap: 6px;
       }
 
-      .tag button {
-        background: none;
-        border: none;
-        color: #1976d2;
-        cursor: pointer;
-        font-size: 1.1em;
-        padding: 0;
-        line-height: 1;
+      label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
       }
 
-      button {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
+      input[type="text"],
+      input[type="date"],
+      input[type="number"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font: inherit;
         font-size: 14px;
+        background: #fff;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
       }
-
-      .btn-primary {
-        background: #00bcd4;
-        color: white;
-        width: 100%;
+      textarea {
+        min-height: 160px;
+        resize: vertical;
       }
-
-      .btn-primary:hover {
-        background: #0097a7;
-      }
-
-      .btn-secondary {
-        background: #f0f0f0;
-        color: #333;
-        width: 100%;
-      }
-
-      .btn-secondary:hover {
-        background: #e0e0e0;
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-weak);
       }
 
       .status {
-        padding: 12px;
-        border-radius: 4px;
-        margin-bottom: 15px;
         display: none;
-        font-size: 0.9em;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 14px;
+        font-size: 13px;
       }
-
+      .status.show {
+        display: block;
+      }
       .status.success {
-        background: #c8e6c9;
-        color: #2e7d32;
-        display: block;
+        border-color: rgba(22, 163, 74, 0.25);
+        background: rgba(22, 163, 74, 0.08);
+        color: var(--success);
       }
-
       .status.error {
-        background: #ffcdd2;
-        color: #c62828;
-        display: block;
+        border-color: rgba(239, 68, 68, 0.25);
+        background: rgba(239, 68, 68, 0.08);
+        color: var(--danger);
       }
 
-      .loading {
-        text-align: center;
-        color: #999;
-        padding: 20px 0;
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
       }
 
-      .error-text {
-        background: #ffebee;
-        color: #c62828;
-        padding: 12px;
-        border-radius: 4px;
+      .btn {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 13px;
+        transition:
+          transform 0.03s,
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .btn.primary:hover {
+        filter: brightness(0.98);
+      }
+      .btn.ghost:hover {
+        background: #f1f5f9;
       }
 
-      @media (max-width: 768px) {
-        .container {
-          grid-template-columns: 1fr;
-        }
-
-        .editor {
-          padding: 20px;
-        }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 14px;
       }
 
-      /* Slash Command Menu */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 14px 0;
+      }
+
+      /* Categories */
+      .category-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 8px;
+      }
+      .category-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
+      }
+      .category-item input {
+        width: 16px;
+        height: 16px;
+      }
+      .category-item label {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* File preview */
+      .file-name {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .image-preview {
+        max-width: 100%;
+        max-height: 280px;
+        margin-top: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fff;
+      }
+
+      /* Block editor */
+      .block-editor {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .block {
+        display: grid;
+        grid-template-columns: 46px 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+      .block-type-btn {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 0;
+        font-weight: 800;
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .block-type-btn:hover {
+        background: #f8fafc;
+      }
+      .block-input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .block-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-weak);
+      }
+
       .slash-menu {
         position: absolute;
         background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        min-width: 300px;
-        max-width: 450px;
-        max-height: 400px;
-        overflow-y: auto;
-        display: none;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        z-index: 9999;
+        overflow: hidden;
+        min-width: 260px;
       }
-
-      .slash-menu.active {
-        display: block;
-      }
-
-      .slash-item {
-        padding: 12px 16px;
+      .slash-menu-item {
+        padding: 10px 12px;
         cursor: pointer;
-        transition: background 0.15s;
-        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+        outline: none;
+      }
+      .slash-menu-item:last-child {
+        border-bottom: 0;
+      }
+      .slash-menu-item:hover,
+      .slash-menu-item.selected {
+        background: #f8fafc;
+      }
+      .slash-menu-item strong {
+        color: var(--accent);
+        font-weight: 800;
+        margin-right: 6px;
+      }
+      .slash-menu-item small {
+        color: var(--muted);
+        display: block;
+        font-size: 12px;
+        margin-top: 2px;
       }
 
-      .slash-item:last-child {
-        border-bottom: none;
+      .page-type {
+        display: flex;
+        gap: 14px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
       }
-
-      .slash-item:hover {
-        background: #f0f8ff;
-      }
-
-      .slash-item.selected {
-        background: #e3f2fd;
-      }
-
-      .slash-item-title {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 4px;
-      }
-
-      .slash-item-desc {
-        font-size: 0.85em;
-        color: #999;
-        margin-bottom: 8px;
-      }
-
-      .slash-item-preview {
-        font-size: 0.9em;
-        color: #666;
-        line-height: 1.4;
-      }
-
-      .slash-item-preview.subtitle {
-        font-size: 1.5em;
-        font-weight: 600;
-        color: #2c3e50;
-        border-bottom: 2px solid #00bcd4;
-        padding-bottom: 8px;
-      }
-
-      .slash-item-preview.header {
-        font-size: 1.2em;
-        font-weight: 600;
-        color: #34495e;
-        margin-top: 8px;
-      }
-
-      .slash-item-preview.paragraph {
-        font-size: 0.95em;
-        color: #555;
-        line-height: 1.6;
-      }
-
-      .slash-item-preview.code {
-        background: #2c3e50;
-        color: #00bcd4;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 0.85em;
+      .page-type label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--text);
+        cursor: pointer;
+        margin: 0;
       }
     </style>
   </head>
+
   <body>
     <div class="container">
-      <!-- Editor -->
-      <div class="editor">
-        <h2>Create Article</h2>
-
-        <div id="blocks"></div>
-
-        <!-- Slash Command Menu -->
-        <div id="slashMenu" class="slash-menu"></div>
-      </div>
-
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="panel">
-          <h3>Article Info</h3>
-          <div class="form-group">
-            <label>Title</label>
-            <input type="text" id="title" placeholder="Article title" />
-          </div>
-          <div class="form-group">
-            <label>Slug</label>
-            <input type="text" id="slug" placeholder="article-slug" />
-          </div>
-          <div class="form-group">
-            <label>Image URL</label>
-            <input type="url" id="imageURI" placeholder="https://..." />
-          </div>
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="date" />
-          </div>
+      <header>
+        <div>
+          <h1>Content Manager</h1>
+          <div class="subtitle">Articles + Pages (minimal admin UI)</div>
         </div>
-
-        <div class="panel">
-          <h3>Categories</h3>
-          <div id="categories" class="loading">Loading...</div>
-          <div id="selectedTags" class="selected-tags"></div>
-        </div>
-
-        <div class="panel">
-          <div id="status" class="status"></div>
-          <button class="btn-primary" onclick="publish()">📤 Publish</button>
+        <div class="tabs" role="tablist" aria-label="Content type">
           <button
-            class="btn-secondary"
-            onclick="reset()"
-            style="margin-top: 10px"
+            class="tab-btn active"
+            onclick="switchTab(event, 'article')"
+            type="button"
           >
-            🔄 Reset
+            Article
+          </button>
+          <button
+            class="tab-btn"
+            onclick="switchTab(event, 'page')"
+            type="button"
+          >
+            Page
           </button>
         </div>
-      </aside>
+      </header>
+
+      <!-- ARTICLE SECTION -->
+      <section id="article" class="section active">
+        <div class="panel">
+          <div id="articleStatus" class="status"></div>
+
+          <div class="grid">
+            <div class="form-group">
+              <label>Edit Existing Article</label>
+              <select id="articleSelect" onchange="loadArticle()">
+                <option value="">-- Create New --</option>
+              </select>
+              <div class="hint">Pick one to load it into the editor.</div>
+            </div>
+
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" id="articleDate" />
+              <div class="hint">Auto-fills to today for new articles.</div>
+            </div>
+
+            <div class="form-group">
+              <label>Title *</label>
+              <input
+                type="text"
+                id="articleTitle"
+                placeholder="Article title"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Slug (URL) *</label>
+              <input
+                type="text"
+                id="articleSlug"
+                placeholder="article-url-slug"
+              />
+              <div class="hint">Tip: use lowercase + dashes.</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="grid">
+            <div class="form-group">
+              <label>Cover Image *</label>
+              <input type="file" id="coverImage" accept="image/*" />
+              <img
+                id="coverPreview"
+                class="image-preview"
+                style="display: none"
+              />
+              <div id="coverFileName" class="file-name"></div>
+            </div>
+
+            <div class="form-group">
+              <label>Categories *</label>
+              <div id="categoriesList" class="category-list"></div>
+              <div class="hint">Must pick at least 1.</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="two-col">
+            <div class="form-group">
+              <label>Content *</label>
+              <div class="hint">
+                Enter adds a new block for headings. Ctrl/Cmd+Enter adds a new
+                block for paragraphs. Type “/” at the start of an empty block to
+                choose a type.
+              </div>
+              <div id="articleBlockEditor" class="block-editor"></div>
+            </div>
+
+            <div class="row">
+              <button
+                class="btn primary"
+                onclick="publishArticle()"
+                type="button"
+              >
+                Publish
+              </button>
+              <button class="btn ghost" onclick="resetArticle()" type="button">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE SECTION -->
+      <section id="page" class="section">
+        <div class="panel">
+          <div id="pageStatus" class="status"></div>
+
+          <div class="grid">
+            <div class="form-group">
+              <label>Edit Existing Page</label>
+              <select id="pageSelect" onchange="loadPage()">
+                <option value="">-- Create New --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Menu Order *</label>
+              <input type="number" id="pageOrder" placeholder="0" />
+              <div class="hint">Lower shows earlier.</div>
+            </div>
+
+            <div class="form-group">
+              <label>Title *</label>
+              <input type="text" id="pageTitle" placeholder="Page title" />
+            </div>
+
+            <div class="form-group">
+              <label>Slug (URL) *</label>
+              <input type="text" id="pageSlug" placeholder="page-url-slug" />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="form-group">
+            <label>Page Type *</label>
+            <div class="page-type">
+              <label>
+                <input
+                  type="radio"
+                  name="pageType"
+                  value="text"
+                  checked
+                  onchange="togglePageType()"
+                />
+                Written Content
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="pageType"
+                  value="pdf"
+                  onchange="togglePageType()"
+                />
+                PDF File
+              </label>
+            </div>
+          </div>
+
+          <div id="textPageFields">
+            <div class="form-group">
+              <label>Content *</label>
+              <textarea
+                id="pageContent"
+                placeholder="Write your page content here..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div id="pdfPageFields" style="display: none">
+            <div class="form-group">
+              <label>PDF File *</label>
+              <input type="file" id="pdfFile" accept=".pdf" />
+              <div id="pdfFileName" class="file-name"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn primary" onclick="publishPage()" type="button">
+              Publish
+            </button>
+            <button class="btn ghost" onclick="resetPage()" type="button">
+              Reset
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <script>
-      const API_URL = "http://localhost:3000/api";
-      let blocks = [];
-      let blockId = 0;
+      const API_URL =
+        localStorage.getItem("apiUrl") || "http://localhost:3000/api";
+
       let selectedCategories = [];
       let allCategories = [];
+      let currentArticleId = null;
+      let currentPageId = null;
+      let selectedCoverImage = null;
+      let selectedPdfFile = null;
+
+      // Block types for article editor
+      const BLOCK_TYPES = {
+        paragraph: { label: "¶", name: "Paragraph", desc: "Plain text" },
+        heading1: { label: "H1", name: "Heading 1", desc: "Large heading" },
+        heading2: { label: "H2", name: "Heading 2", desc: "Medium heading" },
+        heading3: { label: "H3", name: "Heading 3", desc: "Small heading" },
+        quote: { label: "❝", name: "Quote", desc: "Quoted text" },
+        list: { label: "•", name: "List Item", desc: "Bulleted item" },
+      };
 
       document.addEventListener("DOMContentLoaded", () => {
         setTodaysDate();
         loadCategories();
-        addBlock("paragraph");
+        loadExistingArticles();
+        loadExistingPages();
+        setupImageUpload();
+        setupPdfUpload();
+        initializeBlockEditor();
+        setupAutoPopulate();
       });
 
-      function setTodaysDate() {
-        const today = new Date().toISOString().split("T")[0];
-        document.getElementById("date").value = today;
+      // ===== Tabs =====
+      function switchTab(e, tab) {
+        document
+          .querySelectorAll(".section")
+          .forEach((s) => s.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(tab).classList.add("active");
+        e.currentTarget.classList.add("active");
+
+        // reset statuses when switching
+        document.getElementById("articleStatus").className = "status";
+        document.getElementById("pageStatus").className = "status";
+
+        if (tab === "article") resetArticle();
+        else resetPage();
       }
 
+      function showStatus(elementId, message, type) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.className = `status show ${type}`;
+        if (type === "success") {
+          setTimeout(() => {
+            el.className = "status";
+          }, 2500);
+        }
+      }
+
+      // ===== BLOCK EDITOR (FIXED) =====
+      function initializeBlockEditor() {
+        const editor = document.getElementById("articleBlockEditor");
+        editor.innerHTML = "";
+        addNewBlock(editor, "paragraph");
+      }
+
+      function isMultilineType(type) {
+        return type === "paragraph" || type === "quote" || type === "list";
+      }
+
+      function focusLastBlockInput(editor) {
+        const inputs = editor.querySelectorAll(".block-input");
+        inputs[inputs.length - 1]?.focus();
+      }
+
+      function attachBlockInputHandlers(input, editor, block) {
+        input.addEventListener("keydown", (e) => {
+          const type = block.dataset.blockType;
+          const multiline = isMultilineType(type);
+
+          // Create next block on Enter for headings (single-line)
+          if (e.key === "Enter" && !multiline) {
+            e.preventDefault();
+            addNewBlock(editor, "paragraph");
+            focusLastBlockInput(editor);
+            return;
+          }
+
+          // Ctrl/Cmd+Enter for multiline blocks
+          if (e.key === "Enter" && multiline && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            addNewBlock(editor, "paragraph");
+            focusLastBlockInput(editor);
+            return;
+          }
+
+          // "/" at start of empty block opens menu
+          if (
+            e.key === "/" &&
+            input.value === "" &&
+            input.selectionStart === 0
+          ) {
+            e.preventDefault();
+            showBlockTypeMenu(block);
+            return;
+          }
+        });
+      }
+
+      function addNewBlock(editor, type = "paragraph") {
+        const block = document.createElement("div");
+        block.className = "block";
+        const blockId = `block-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        block.dataset.blockId = blockId;
+        block.dataset.blockType = type;
+
+        const typeBtn = document.createElement("button");
+        typeBtn.className = "block-type-btn";
+        typeBtn.textContent = BLOCK_TYPES[type].label;
+        typeBtn.type = "button";
+        typeBtn.onclick = (e) => {
+          e.preventDefault();
+          showBlockTypeMenu(block);
+        };
+
+        const multiline = isMultilineType(type);
+        const input = document.createElement(multiline ? "textarea" : "input");
+        input.className = "block-input";
+        if (!multiline) input.type = "text";
+        input.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
+        input.dataset.blockInput = blockId;
+
+        attachBlockInputHandlers(input, editor, block);
+
+        block.appendChild(typeBtn);
+        block.appendChild(input);
+        editor.appendChild(block);
+
+        return block;
+      }
+
+      let activeMenuCleanup = null;
+
+      function closeBlockTypeMenu() {
+        const menu = document.querySelector(".slash-menu");
+        if (menu) menu.remove();
+        if (activeMenuCleanup) {
+          activeMenuCleanup();
+          activeMenuCleanup = null;
+        }
+      }
+
+      function showBlockTypeMenu(block) {
+        closeBlockTypeMenu();
+
+        const menu = document.createElement("div");
+        menu.className = "slash-menu";
+
+        const rect = block.getBoundingClientRect();
+        // position relative to viewport + scroll
+        menu.style.top = rect.top + window.scrollY + "px";
+        menu.style.left = rect.left + window.scrollX + 60 + "px";
+
+        let selectedIndex = 0;
+        const entries = Object.entries(BLOCK_TYPES);
+
+        entries.forEach(([key, value], idx) => {
+          const item = document.createElement("div");
+          item.className = "slash-menu-item";
+          item.tabIndex = 0;
+          item.innerHTML = `<strong>${value.label}</strong>${value.name}<small>${value.desc}</small>`;
+          item.dataset.blockType = key;
+
+          if (idx === 0) item.classList.add("selected");
+
+          item.onclick = () => {
+            changeBlockType(block, key);
+            closeBlockTypeMenu();
+            block.querySelector(".block-input")?.focus();
+          };
+
+          menu.appendChild(item);
+        });
+
+        document.body.appendChild(menu);
+
+        const handleKeydown = (e) => {
+          const items = menu.querySelectorAll(".slash-menu-item");
+          if (!items.length) return;
+
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % items.length;
+            items.forEach((i) => i.classList.remove("selected"));
+            items[selectedIndex].classList.add("selected");
+            items[selectedIndex].focus();
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+            items.forEach((i) => i.classList.remove("selected"));
+            items[selectedIndex].classList.add("selected");
+            items[selectedIndex].focus();
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            const type = items[selectedIndex].dataset.blockType;
+            changeBlockType(block, type);
+            closeBlockTypeMenu();
+            block.querySelector(".block-input")?.focus();
+          } else if (e.key === "Escape") {
+            closeBlockTypeMenu();
+          }
+        };
+
+        const handleClickOutside = (e) => {
+          const clickedMenu = menu.contains(e.target);
+          const clickedBlock = block.contains(e.target);
+          if (!clickedMenu && !clickedBlock) closeBlockTypeMenu();
+        };
+
+        document.addEventListener("keydown", handleKeydown);
+        document.addEventListener("mousedown", handleClickOutside);
+
+        activeMenuCleanup = () => {
+          document.removeEventListener("keydown", handleKeydown);
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }
+
+      function changeBlockType(block, type) {
+        block.dataset.blockType = type;
+        const btn = block.querySelector(".block-type-btn");
+        btn.textContent = BLOCK_TYPES[type].label;
+
+        const editor = block.parentElement;
+        const oldInput = block.querySelector(".block-input");
+        const multiline = isMultilineType(type);
+
+        let newInput;
+        if (multiline && oldInput.tagName !== "TEXTAREA") {
+          newInput = document.createElement("textarea");
+        } else if (!multiline && oldInput.tagName !== "INPUT") {
+          newInput = document.createElement("input");
+          newInput.type = "text";
+        } else {
+          // Same tag; just update placeholder and keep handlers
+          oldInput.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
+          return;
+        }
+
+        newInput.className = "block-input";
+        newInput.value = oldInput.value || "";
+        newInput.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
+        newInput.dataset.blockInput = oldInput.dataset.blockInput;
+
+        // IMPORTANT: re-attach handlers (this was the big bug)
+        attachBlockInputHandlers(newInput, editor, block);
+
+        block.replaceChild(newInput, oldInput);
+      }
+
+      function getBlocksData() {
+        const editor = document.getElementById("articleBlockEditor");
+        const blocks = [];
+        editor.querySelectorAll(".block").forEach((block) => {
+          const type = block.dataset.blockType;
+          const input = block.querySelector(".block-input");
+          if (input && input.value.trim()) {
+            blocks.push({ type, data: input.value.trim() });
+          }
+        });
+        return blocks;
+      }
+
+      // ===== CATEGORIES =====
       async function loadCategories() {
         try {
-          console.log("Fetching categories from:", `${API_URL}/catagories`);
           const res = await fetch(`${API_URL}/catagories`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
-          console.log("Categories loaded:", data);
-          allCategories = Array.isArray(data) ? data : data.data || [];
-          if (allCategories.length === 0) {
-            document.getElementById("categories").innerHTML =
-              '<p style="color: #999;">No categories available</p>';
-          } else {
-            renderCategories();
-          }
-        } catch (error) {
-          console.error("Category fetch error:", error);
-          document.getElementById("categories").innerHTML =
-            `<div class="error-text">⚠️ Error: ${error.message}</div>`;
+          allCategories = Array.isArray(data) ? data : [];
+          renderCategories();
+        } catch (err) {
+          console.error("Error loading categories:", err);
         }
       }
 
       function renderCategories() {
-        const container = document.getElementById("categories");
+        const container = document.getElementById("categoriesList");
         container.innerHTML = allCategories
           .map(
-            (cat) =>
-              `<div class="category-item">
-            <input type="checkbox" id="cat-${cat._id}" value="${cat._id}" onchange="updateCategories()">
-            <label for="cat-${cat._id}">${cat.name}</label>
-          </div>`,
+            (cat) => `
+            <div class="category-item">
+              <input type="checkbox" id="cat-${cat._id}" value="${cat._id}" onchange="toggleCategory('${cat._id}')">
+              <label for="cat-${cat._id}">${cat.name}</label>
+            </div>
+          `,
           )
           .join("");
       }
 
-      function updateCategories() {
-        const checked = document.querySelectorAll('input[id^="cat-"]:checked');
-        selectedCategories = Array.from(checked).map((cb) => cb.value);
-        renderTags();
-      }
-
-      function renderTags() {
-        const container = document.getElementById("selectedTags");
-        container.innerHTML = selectedCategories
-          .map((catId) => {
-            const cat = allCategories.find((c) => c._id === catId);
-            return `<div class="tag">${cat.name} <button type="button" onclick="removeTag('${catId}')">×</button></div>`;
-          })
-          .join("");
-      }
-
-      function removeTag(catId) {
-        document.getElementById(`cat-${catId}`).checked = false;
-        updateCategories();
-      }
-
-      function addBlock(type) {
-        const id = blockId++;
-        blocks.push({ id, type, content: "" });
-        renderBlocks();
-        setTimeout(() => {
-          const el = document.querySelector(`[data-id="${id}"]`);
-          if (el) el.focus();
-        }, 0);
-      }
-
-      function renderBlocks() {
-        const container = document.getElementById("blocks");
-        container.innerHTML = blocks
-          .map(
-            (block) =>
-              `<div class="block">
-            <div 
-              class="block-content" 
-              data-id="${block.id}" 
-              data-type="${block.type}"
-              contenteditable="true"
-              onblur="saveBlockContent(${block.id})"
-              onkeydown="handleBlockKeydown(event, ${block.id})"
-              onkeyup="handleBlockKeyup(event, ${block.id})"
-            >${escapeHtml(block.content)}</div>
-            <button type="button" class="block-delete" onclick="deleteBlock(${block.id})">Delete</button>
-          </div>`,
-          )
-          .join("");
-      }
-
-      function saveBlockContent(id) {
-        const el = document.querySelector(`[data-id="${id}"]`);
-        const block = blocks.find((b) => b.id === id);
-        if (el && block) {
-          block.content = el.innerText || "";
+      function toggleCategory(id) {
+        const checkbox = document.getElementById(`cat-${id}`);
+        if (checkbox.checked) {
+          if (!selectedCategories.includes(id)) selectedCategories.push(id);
+        } else {
+          selectedCategories = selectedCategories.filter((c) => c !== id);
         }
       }
 
-      function deleteBlock(id) {
-        blocks = blocks.filter((b) => b.id !== id);
-        if (blocks.length === 0) addBlock("paragraph");
-        renderBlocks();
+      // ===== ARTICLES =====
+      async function loadExistingArticles() {
+        try {
+          const res = await fetch(`${API_URL}/article`);
+          const data = await res.json();
+          const select = document.getElementById("articleSelect");
+          select.innerHTML =
+            '<option value="">-- Create New --</option>' +
+            (Array.isArray(data) ? data : [])
+              .map(
+                (a) =>
+                  `<option value="${a._id}">${a.title} (${new Date(a.date).toLocaleDateString()})</option>`,
+              )
+              .join("");
+        } catch (err) {
+          console.error("Error loading articles:", err);
+        }
       }
 
-      async function publish() {
-        const title = document.getElementById("title").value.trim();
-        const slug = document.getElementById("slug").value.trim();
-        const imageURI = document.getElementById("imageURI").value.trim();
-        const date = document.getElementById("date").value;
+      async function loadArticle() {
+        const select = document.getElementById("articleSelect");
+        const id = select.value;
+        if (!id) {
+          resetArticle();
+          return;
+        }
+        try {
+          const res = await fetch(`${API_URL}/article/id/${id}`);
+          const article = await res.json();
 
-        if (!title || !slug || !imageURI || !date) {
-          showStatus("Fill all fields", "error");
+          currentArticleId = article._id;
+          document.getElementById("articleTitle").value = article.title || "";
+          document.getElementById("articleSlug").value = article.slug || "";
+          document.getElementById("articleDate").value = (
+            article.date || ""
+          ).split("T")[0];
+
+          // Blocks
+          const editor = document.getElementById("articleBlockEditor");
+          editor.innerHTML = "";
+          (article.elements || []).forEach((element) => {
+            const b = addNewBlock(editor, element.type || "paragraph");
+            b.querySelector(".block-input").value = element.data || "";
+          });
+          if (editor.children.length === 0) addNewBlock(editor, "paragraph");
+
+          // Categories (keep your intentional spelling)
+          selectedCategories = article.catagories || [];
+          document.querySelectorAll('input[id^="cat-"]').forEach((cb) => {
+            cb.checked = selectedCategories.includes(cb.value);
+          });
+
+          // Cover preview
+          if (article.imageURI) {
+            const preview = document.getElementById("coverPreview");
+            preview.src = article.imageURI;
+            preview.style.display = "block";
+          }
+        } catch (err) {
+          showStatus("articleStatus", "Error loading article", "error");
+        }
+      }
+
+      function setupImageUpload() {
+        const input = document.getElementById("coverImage");
+        input.addEventListener("change", (e) => {
+          selectedCoverImage = e.target.files[0];
+          if (!selectedCoverImage) return;
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const preview = document.getElementById("coverPreview");
+            preview.src = event.target.result;
+            preview.style.display = "block";
+          };
+          reader.readAsDataURL(selectedCoverImage);
+
+          document.getElementById("coverFileName").textContent =
+            `Selected: ${selectedCoverImage.name}`;
+        });
+      }
+
+      async function publishArticle() {
+        const title = document.getElementById("articleTitle").value.trim();
+        const slug = document.getElementById("articleSlug").value.trim();
+        const date = document.getElementById("articleDate").value;
+        const elements = getBlocksData();
+
+        if (
+          !title ||
+          !slug ||
+          !date ||
+          elements.length === 0 ||
+          selectedCategories.length === 0
+        ) {
+          showStatus("articleStatus", "All fields are required", "error");
           return;
         }
 
-        const content = blocks
-          .filter((b) => b.content.trim())
-          .map((b) => ({ type: b.type, data: b.content }));
-        if (!content.length) {
-          showStatus("Add some content", "error");
-          return;
-        }
-
-        if (!selectedCategories.length) {
-          showStatus("Select a category", "error");
-          return;
+        // If not editing, check if slug exists and set to edit that article
+        if (!currentArticleId) {
+          try {
+            const res = await fetch(`${API_URL}/article`);
+            const articles = await res.json();
+            const existingArticle = articles.find((a) => a.slug === slug);
+            if (existingArticle) {
+              currentArticleId = existingArticle._id;
+            }
+          } catch (err) {
+            console.error("Error checking existing articles:", err);
+          }
         }
 
         try {
-          const res = await fetch(`${API_URL}/article/add`, {
-            method: "POST",
+          let imageURI = null;
+
+          // Convert image to base64 if selected
+          if (selectedCoverImage) {
+            imageURI = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(selectedCoverImage);
+            });
+          }
+
+          // If editing and no new upload, keep existing preview src (could be URL or base64)
+          const existingPreviewSrc =
+            document.getElementById("coverPreview").src || null;
+
+          const method = currentArticleId ? "PUT" : "POST";
+          const endpoint = currentArticleId
+            ? `article/${currentArticleId}`
+            : "article/add";
+
+          const res = await fetch(`${API_URL}/${endpoint}`, {
+            method,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               title,
               slug,
-              imageURI,
-              date: new Date(date).toISOString(),
-              catagories: selectedCategories,
-              elements: content,
+              imageURI: imageURI || existingPreviewSrc,
+              date,
+              catagories: selectedCategories, // intentional spelling
+              elements,
             }),
           });
 
-          if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(
-              error.message || error.error || "Failed to publish",
-            );
-          }
-          showStatus("✅ Published!", "success");
-          setTimeout(() => reset(), 1500);
-        } catch (error) {
-          showStatus(`Error: ${error.message}`, "error");
-          console.error(error);
+          if (!res.ok) throw new Error("Publish failed");
+
+          showStatus(
+            "articleStatus",
+            currentArticleId ? "✅ Article updated!" : "✅ Article published!",
+            "success",
+          );
+
+          setTimeout(() => {
+            loadExistingArticles();
+            resetArticle();
+          }, 900);
+        } catch (err) {
+          showStatus("articleStatus", "Error: " + err.message, "error");
         }
       }
 
-      function reset() {
-        document.getElementById("title").value = "";
-        document.getElementById("slug").value = "";
-        document.getElementById("imageURI").value = "";
-        setTodaysDate();
-        blocks = [];
-        blockId = 0;
+      function resetArticle() {
+        closeBlockTypeMenu();
+
+        document.getElementById("articleTitle").value = "";
+        document.getElementById("articleSlug").value = "";
+        document.getElementById("coverImage").value = "";
+        document.getElementById("coverPreview").style.display = "none";
+        document.getElementById("coverPreview").src = "";
+        document.getElementById("coverFileName").textContent = "";
+        document.getElementById("articleSelect").value = "";
+
+        selectedCoverImage = null;
+        currentArticleId = null;
         selectedCategories = [];
+
         document
           .querySelectorAll('input[id^="cat-"]')
           .forEach((cb) => (cb.checked = false));
-        renderTags();
-        addBlock("paragraph");
-        document.getElementById("status").className = "status";
+
+        const editor = document.getElementById("articleBlockEditor");
+        editor.innerHTML = "";
+        addNewBlock(editor, "paragraph");
+
+        setTodaysDate();
       }
 
-      function showStatus(msg, type) {
-        const el = document.getElementById("status");
-        el.textContent = msg;
-        el.className = `status ${type}`;
-        if (type === "success") {
+      // ===== PAGES =====
+      async function loadExistingPages() {
+        try {
+          const res = await fetch(`${API_URL}/pages`);
+          const data = await res.json();
+          const select = document.getElementById("pageSelect");
+          select.innerHTML =
+            '<option value="">-- Create New --</option>' +
+            (Array.isArray(data) ? data : [])
+              .map(
+                (p) =>
+                  `<option value="${p._id}">${p.title} (Order: ${p.order})</option>`,
+              )
+              .join("");
+        } catch (err) {
+          console.error("Error loading pages:", err);
+        }
+      }
+
+      async function loadPage() {
+        const select = document.getElementById("pageSelect");
+        const id = select.value;
+        if (!id) {
+          resetPage();
+          return;
+        }
+        try {
+          const res = await fetch(`${API_URL}/pages/${id}`);
+          const page = await res.json();
+          currentPageId = page._id;
+
+          document.getElementById("pageTitle").value = page.title || "";
+          document.getElementById("pageSlug").value = page.slug || "";
+          document.getElementById("pageOrder").value = page.order ?? 0;
+
+          if (page.pdfFile) {
+            document.querySelector('input[value="pdf"]').checked = true;
+            togglePageType();
+            document.getElementById("pdfFileName").textContent =
+              `Current: ${page.pdfFile}`;
+          } else {
+            document.querySelector('input[value="text"]').checked = true;
+            togglePageType();
+            document.getElementById("pageContent").value = (page.elements || [])
+              .map((e) => e.data)
+              .join("\n\n");
+          }
+        } catch (err) {
+          showStatus("pageStatus", "Error loading page", "error");
+        }
+      }
+
+      function togglePageType() {
+        const isText =
+          document.querySelector('input[name="pageType"]:checked').value ===
+          "text";
+        document.getElementById("textPageFields").style.display = isText
+          ? "block"
+          : "none";
+        document.getElementById("pdfPageFields").style.display = isText
+          ? "none"
+          : "block";
+      }
+
+      function setupPdfUpload() {
+        const input = document.getElementById("pdfFile");
+        input.addEventListener("change", (e) => {
+          selectedPdfFile = e.target.files[0];
+          document.getElementById("pdfFileName").textContent = selectedPdfFile
+            ? `Selected: ${selectedPdfFile.name}`
+            : "";
+        });
+      }
+
+      async function publishPage() {
+        const title = document.getElementById("pageTitle").value.trim();
+        const slug = document.getElementById("pageSlug").value.trim();
+        const order =
+          parseInt(document.getElementById("pageOrder").value, 10) || 0;
+        const isText =
+          document.querySelector('input[name="pageType"]:checked').value ===
+          "text";
+
+        if (!title || !slug) {
+          showStatus("pageStatus", "Title and slug are required", "error");
+          return;
+        }
+
+        // If not editing, check if slug exists and set to edit that page
+        if (!currentPageId) {
+          try {
+            const res = await fetch(`${API_URL}/pages`);
+            const pages = await res.json();
+            const existingPage = pages.find((p) => p.slug === slug);
+            if (existingPage) {
+              currentPageId = existingPage._id;
+            }
+          } catch (err) {
+            console.error("Error checking existing pages:", err);
+          }
+        }
+
+        try {
+          if (isText) {
+            const content = document.getElementById("pageContent").value.trim();
+            if (!content) {
+              showStatus("pageStatus", "Content is required", "error");
+              return;
+            }
+
+            const elements = content
+              .split(/\n\s*\n/)
+              .filter((p) => p.trim())
+              .map((p) => ({ type: "paragraph", data: p.trim() }));
+
+            const method = currentPageId ? "PUT" : "POST";
+            const endpoint = currentPageId
+              ? `pages/${currentPageId}`
+              : "pages/add";
+
+            const res = await fetch(`${API_URL}/${endpoint}`, {
+              method,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title, slug, order, elements }),
+            });
+
+            if (!res.ok) throw new Error("Publish failed");
+            showStatus(
+              "pageStatus",
+              currentPageId ? "✅ Page updated!" : "✅ Page created!",
+              "success",
+            );
+          } else {
+            if (!selectedPdfFile && !currentPageId) {
+              showStatus("pageStatus", "PDF file is required", "error");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("slug", slug);
+            formData.append("order", order);
+            if (selectedPdfFile) formData.append("pdfFile", selectedPdfFile);
+
+            const method = currentPageId ? "PUT" : "POST";
+            const endpoint = currentPageId
+              ? `pages/${currentPageId}`
+              : "pages/add";
+
+            const res = await fetch(`${API_URL}/${endpoint}`, {
+              method,
+              body: formData,
+            });
+
+            if (!res.ok) throw new Error("Publish failed");
+            showStatus(
+              "pageStatus",
+              currentPageId ? "✅ Page updated!" : "✅ Page created!",
+              "success",
+            );
+          }
+
           setTimeout(() => {
-            el.className = "status";
-          }, 3000);
+            loadExistingPages();
+            resetPage();
+          }, 900);
+        } catch (err) {
+          showStatus("pageStatus", "Error: " + err.message, "error");
         }
       }
 
-      let currentSlashBlockId = null;
-
-      function handleBlockKeydown(event, id) {
-        if (event.key === "Escape") {
-          closeSlashMenu();
-        }
-        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-          const menu = document.getElementById("slashMenu");
-          if (menu.classList.contains("active")) {
-            event.preventDefault();
-            navigateSlashMenu(event.key === "ArrowDown" ? 1 : -1);
-          }
-        }
-        if (event.key === "Enter") {
-          const menu = document.getElementById("slashMenu");
-          if (menu.classList.contains("active")) {
-            event.preventDefault();
-            selectSlashItem();
-          }
-        }
+      function resetPage() {
+        document.getElementById("pageTitle").value = "";
+        document.getElementById("pageSlug").value = "";
+        document.getElementById("pageOrder").value = "0";
+        document.getElementById("pageContent").value = "";
+        document.getElementById("pdfFile").value = "";
+        document.getElementById("pdfFileName").textContent = "";
+        document.getElementById("pageSelect").value = "";
+        document.querySelector('input[value="text"]').checked = true;
+        togglePageType();
+        selectedPdfFile = null;
+        currentPageId = null;
       }
 
-      function handleBlockKeyup(event, id) {
-        const el = document.querySelector(`[data-id="${id}"]`);
-        const text = el.innerText;
-
-        if (text.startsWith("/")) {
-          currentSlashBlockId = id;
-          const query = text.substring(1).toLowerCase();
-          showSlashMenu(query, el);
-        } else {
-          closeSlashMenu();
-          // Save content when not showing menu
-          const block = blocks.find((b) => b.id === id);
-          if (block) {
-            block.content = text;
-          }
-        }
+      function setTodaysDate() {
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("articleDate").value = today;
       }
 
-      function showSlashMenu(query, blockEl) {
-        const commands = [
-          {
-            type: "subtitle",
-            name: "Subtitle",
-            desc: "Large heading text",
-            preview: "Article Title Here",
-          },
-          {
-            type: "header",
-            name: "Header",
-            desc: "Section heading",
-            preview: "Section Header",
-          },
-          {
-            type: "paragraph",
-            name: "Paragraph",
-            desc: "Regular text content",
-            preview: "Your paragraph text goes here...",
-          },
-          {
-            type: "code",
-            name: "Code",
-            desc: "Code snippet",
-            preview: "const hello = 'world';",
-          },
-        ];
+      function setupAutoPopulate() {
+        // Auto-populate page fields when slug changes
+        document
+          .getElementById("pageSlug")
+          .addEventListener("input", async (e) => {
+            const slug = e.target.value.trim();
+            if (!slug || currentPageId) return; // Don't auto-populate if already editing
 
-        const filtered = commands.filter(
-          (cmd) =>
-            cmd.name.toLowerCase().includes(query) ||
-            cmd.desc.toLowerCase().includes(query),
-        );
+            try {
+              const res = await fetch(`${API_URL}/pages`);
+              const pages = await res.json();
+              const existingPage = pages.find((p) => p.slug === slug);
+              if (existingPage) {
+                currentPageId = existingPage._id;
+                document.getElementById("pageTitle").value =
+                  existingPage.title || "";
+                document.getElementById("pageOrder").value =
+                  existingPage.order ?? 0;
 
-        const menu = document.getElementById("slashMenu");
-        const rect = blockEl.getBoundingClientRect();
-
-        menu.innerHTML = filtered
-          .map(
-            (cmd, idx) =>
-              `<div class="slash-item" onclick="insertSlashCommand('${cmd.type}')">
-            <div class="slash-item-title">${cmd.name}</div>
-            <div class="slash-item-desc">${cmd.desc}</div>
-            <div class="slash-item-preview ${cmd.type}">${cmd.preview}</div>
-          </div>`,
-          )
-          .join("");
-
-        menu.style.top = rect.top + rect.height + 5 + "px";
-        menu.style.left = rect.left + "px";
-        menu.classList.add("active");
-      }
-
-      function closeSlashMenu() {
-        document.getElementById("slashMenu").classList.remove("active");
-        currentSlashBlockId = null;
-      }
-
-      function navigateSlashMenu(direction) {
-        const items = document.querySelectorAll(".slash-item");
-        const selected = document.querySelector(".slash-item.selected");
-        let index = Array.from(items).indexOf(selected);
-
-        if (index === -1) index = 0;
-        else index = (index + direction + items.length) % items.length;
-
-        items.forEach((item) => item.classList.remove("selected"));
-        items[index].classList.add("selected");
-      }
-
-      function selectSlashItem() {
-        const selected = document.querySelector(".slash-item.selected");
-        if (selected) {
-          selected.click();
-        }
-      }
-
-      function insertSlashCommand(type) {
-        if (currentSlashBlockId === null) return;
-
-        const block = blocks.find((b) => b.id === currentSlashBlockId);
-        if (block) {
-          block.type = type;
-          block.content = "";
-        }
-
-        closeSlashMenu();
-        renderBlocks();
-
-        setTimeout(() => {
-          const el = document.querySelector(
-            `[data-id="${currentSlashBlockId}"]`,
-          );
-          if (el) el.focus();
-        }, 0);
-      }
-
-      function escapeHtml(text) {
-        const map = {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;",
-        };
-        return text.replace(/[&<>"']/g, (m) => map[m]);
+                if (existingPage.pdfFile) {
+                  document.querySelector('input[value="pdf"]').checked = true;
+                  togglePageType();
+                  document.getElementById("pdfFileName").textContent =
+                    `Current: ${existingPage.pdfFile}`;
+                } else {
+                  document.querySelector('input[value="text"]').checked = true;
+                  togglePageType();
+                  document.getElementById("pageContent").value = (
+                    existingPage.elements || []
+                  )
+                    .map((e) => e.data)
+                    .join("\n\n");
+                }
+              }
+            } catch (err) {
+              console.error("Error checking existing pages:", err);
+            }
+          });
       }
     </script>
   </body>

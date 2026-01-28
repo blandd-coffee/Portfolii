@@ -12,13 +12,13 @@ const elementBlockSchema = new Schema<IElementBlock>({
 });
 
 const articleSchema = new Schema<IArticle>({
-  title: { type: String, required: true, unique: true },
-  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true, unique: true, index: true },
+  slug: { type: String, required: true, unique: true, index: true },
   imageURI: { type: String, required: true },
-  date: { type: Date, required: true },
-  catagories: [{ type: Schema.Types.ObjectId, ref: "catagory" }],
+  date: { type: Date, required: true, index: true },
+  catagories: [{ type: Schema.Types.ObjectId, ref: "catagory", index: true }],
   elements: { type: [elementBlockSchema], required: true },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now },
 });
 

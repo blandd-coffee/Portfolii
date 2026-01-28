@@ -2,9 +2,9 @@ import { model, Schema } from "mongoose";
 import { type ICatagory } from "../../../shared/catagories.model.js";
 
 const catagorySchema = new Schema<ICatagory>({
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true, unique: true, index: true },
   imageURI: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now },
 });
 

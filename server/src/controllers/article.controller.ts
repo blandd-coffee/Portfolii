@@ -27,6 +27,18 @@ async function getArticleBySlug(req: Request, res: Response) {
   }
 }
 
+async function getArticleById(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string;
+    const article = await Article.findById(id);
+    if (!article) return res.status(404).json({ error: "Article not found" });
+    res.status(200).json(article);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error!" });
+  }
+}
+
 async function postArticle(req: Request, res: Response) {
   try {
     const { title, slug, imageURI, date, catagories, elements }: IArticle =
@@ -81,6 +93,7 @@ async function deleteArticle(req: Request, res: Response) {
 export default {
   getAllArticle,
   getArticleBySlug,
+  getArticleById,
   postArticle,
   updateArticle,
   deleteArticle,

@@ -21,6 +21,23 @@ export const Page = () => {
 
   // If page has a PDF file, display it as full-page viewer
   if (page?.pdfFile) {
+    // Normalize the path - remove any duplicate /uploads/
+    let pdfUrl = page.pdfFile;
+
+    // Handle Windows backslashes
+    pdfUrl = pdfUrl.replace(/\\/g, "/");
+
+    // Remove the uploads/ prefix if it exists (we'll add it back if needed)
+    if (pdfUrl.startsWith("uploads/")) {
+      pdfUrl = pdfUrl.substring(8); // Remove 'uploads/' prefix
+    }
+
+    // Build absolute URL to avoid React Router interception
+    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    const fullPdfUrl = pdfUrl.startsWith("http")
+      ? pdfUrl
+      : `${apiBase}/uploads/${pdfUrl}`;
+
     return (
       <div className="max-w-4xl mx-auto">
         <Card>
@@ -29,7 +46,7 @@ export const Page = () => {
           </CardTitle>
           <CardContent className="p-6">
             <iframe
-              src={`${page.pdfFile}#toolbar=1`}
+              src={`${fullPdfUrl}#toolbar=1`}
               className="w-full h-screen rounded-lg border border-cyan-200"
               title={page?.title}
             />
