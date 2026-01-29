@@ -33,10 +33,13 @@ export const Page = () => {
     }
 
     // Build absolute URL to avoid React Router interception
-    const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    // Always use the full backend URL for PDFs since iframe can't use the proxy
+    const apiBase = "http://localhost:3000";
     const fullPdfUrl = pdfUrl.startsWith("http")
       ? pdfUrl
       : `${apiBase}/uploads/${pdfUrl}`;
+
+    console.log("PDF URL:", fullPdfUrl, "Original pdfFile:", page.pdfFile); // Debug log
 
     return (
       <div className="max-w-4xl mx-auto">
@@ -64,7 +67,8 @@ export const Page = () => {
         </CardTitle>
         <CardContent className="prose prose-sm">
           {page?.elements?.map((element: any, idx: number) => {
-            if (element.type === "subtitle")
+            // Handle heading1 (large heading) - backward compatible with subtitle
+            if (element.type === "heading1" || element.type === "subtitle")
               return (
                 <h2
                   key={idx}
@@ -73,7 +77,12 @@ export const Page = () => {
                   {element.data}
                 </h2>
               );
-            if (element.type === "header")
+            // Handle heading2 and heading3 (medium/small headings) - backward compatible with header
+            if (
+              element.type === "heading2" ||
+              element.type === "heading3" ||
+              element.type === "header"
+            )
               return (
                 <h3
                   key={idx}
@@ -82,7 +91,7 @@ export const Page = () => {
                   {element.data}
                 </h3>
               );
-            if (element.type === "paragraph")
+            if (element.type === "paragraph" || element.type === "quote")
               return (
                 <p key={idx} className="text-gray-700 my-3">
                   {element.data}

@@ -1,5 +1,5 @@
 import type { IArticle } from "@shared/article.model";
-import axiosInstance from "../tools/axiosConfigs";
+import axiosInstance, { API_BASE_URL } from "../tools/axiosConfigs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
@@ -9,6 +9,9 @@ export const ArticlePage = () => {
   const [article, setArticle] = useState<IArticle>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get the backend server URL for PDFs (hardcoded to avoid routing issues)
+  const pdfBaseUrl = "http://localhost:3000";
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -42,7 +45,8 @@ export const ArticlePage = () => {
           </CardTitle>
           <CardContent className="prose prose-sm">
             {(article.elements || []).map((element, idx) => {
-              if (element.type === "subtitle" || element.type === "heading1")
+              // Handle heading1 (large heading) - backward compatible with subtitle
+              if (element.type === "heading1" || element.type === "subtitle")
                 return (
                   <h2
                     key={idx}
@@ -51,10 +55,11 @@ export const ArticlePage = () => {
                     {element.data}
                   </h2>
                 );
+              // Handle heading2 and heading3 (medium/small headings) - backward compatible with header
               if (
-                element.type === "header" ||
                 element.type === "heading2" ||
-                element.type === "heading3"
+                element.type === "heading3" ||
+                element.type === "header"
               )
                 return (
                   <h3
@@ -84,6 +89,26 @@ export const ArticlePage = () => {
                   <ul key={idx} className="list-disc pl-6 my-3">
                     {element.data}
                   </ul>
+                );
+              if (element.type === "pdf")
+                return (
+                  <div key={idx} className="my-4">
+                    <iframe
+                      src={`${pdfBaseUrl}/uploads/${element.data}`}
+                      className="w-full h-96 border border-gray-300 rounded-lg"
+                      title="PDF Document"
+                    />
+                    <div className="mt-2 text-center">
+                      <a
+                        href={`${pdfBaseUrl}/uploads/${element.data}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline text-sm"
+                      >
+                        Open PDF in new tab
+                      </a>
+                    </div>
+                  </div>
                 );
             })}
           </CardContent>

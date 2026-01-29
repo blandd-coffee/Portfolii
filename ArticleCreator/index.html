@@ -460,6 +460,14 @@
 
           <div class="divider"></div>
 
+          <div class="form-group">
+            <label>Index this article</label>
+            <input type="checkbox" id="articleIndexed" checked />
+            <div class="hint">Uncheck to exclude from search indexing</div>
+          </div>
+
+          <div class="divider"></div>
+
           <div class="two-col">
             <div class="form-group">
               <label>Content *</label>
@@ -478,6 +486,15 @@
                 type="button"
               >
                 Publish
+              </button>
+              <button
+                class="btn"
+                id="deleteArticleBtn"
+                onclick="deleteArticle()"
+                type="button"
+                style="background: var(--danger); color: white; display: none"
+              >
+                Delete
               </button>
               <button class="btn ghost" onclick="resetArticle()" type="button">
                 Reset
@@ -501,9 +518,9 @@
             </div>
 
             <div class="form-group">
-              <label>Menu Order *</label>
+              <label>Menu Order</label>
               <input type="number" id="pageOrder" placeholder="0" />
-              <div class="hint">Lower shows earlier.</div>
+              <div class="hint">Auto-assign if empty, lower shows earlier.</div>
             </div>
 
             <div class="form-group">
@@ -566,6 +583,15 @@
             <button class="btn primary" onclick="publishPage()" type="button">
               Publish
             </button>
+            <button
+              class="btn"
+              id="deletePageBtn"
+              onclick="deletePage()"
+              type="button"
+              style="background: var(--danger); color: white; display: none"
+            >
+              Delete
+            </button>
             <button class="btn ghost" onclick="resetPage()" type="button">
               Reset
             </button>
@@ -593,6 +619,8 @@
         heading3: { label: "H3", name: "Heading 3", desc: "Small heading" },
         quote: { label: "❝", name: "Quote", desc: "Quoted text" },
         list: { label: "•", name: "List Item", desc: "Bulleted item" },
+        code: { label: "```", name: "Code", desc: "Code snippet" },
+        pdf: { label: "📄", name: "PDF", desc: "PDF file" },
       };
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -644,7 +672,16 @@
       }
 
       function isMultilineType(type) {
-        return type === "paragraph" || type === "quote" || type === "list";
+        return (
+          type === "paragraph" ||
+          type === "quote" ||
+          type === "list" ||
+          type === "code"
+        );
+      }
+
+      function isFileType(type) {
+        return type === "pdf";
       }
 
       function focusLastBlockInput(editor) {
@@ -702,14 +739,24 @@
           showBlockTypeMenu(block);
         };
 
-        const multiline = isMultilineType(type);
-        const input = document.createElement(multiline ? "textarea" : "input");
-        input.className = "block-input";
-        if (!multiline) input.type = "text";
-        input.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
-        input.dataset.blockInput = blockId;
+        let input;
+        if (isFileType(type)) {
+          input = document.createElement("input");
+          input.type = "file";
+          input.accept = ".pdf";
+          input.className = "block-input";
+          input.placeholder = `Select ${BLOCK_TYPES[type].name.toLowerCase()}...`;
+          input.dataset.blockInput = blockId;
+        } else {
+          const multiline = isMultilineType(type);
+          input = document.createElement(multiline ? "textarea" : "input");
+          input.className = "block-input";
+          if (!multiline) input.type = "text";
+          input.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
+          input.dataset.blockInput = blockId;
 
-        attachBlockInputHandlers(input, editor, block);
+          attachBlockInputHandlers(input, editor, block);
+        }
 
         block.appendChild(typeBtn);
         block.appendChild(input);
@@ -813,9 +860,14 @@
         const editor = block.parentElement;
         const oldInput = block.querySelector(".block-input");
         const multiline = isMultilineType(type);
+        const fileType = isFileType(type);
 
         let newInput;
-        if (multiline && oldInput.tagName !== "TEXTAREA") {
+        if (fileType) {
+          newInput = document.createElement("input");
+          newInput.type = "file";
+          newInput.accept = ".pdf";
+        } else if (multiline && oldInput.tagName !== "TEXTAREA") {
           newInput = document.createElement("textarea");
         } else if (!multiline && oldInput.tagName !== "INPUT") {
           newInput = document.createElement("input");
@@ -827,12 +879,14 @@
         }
 
         newInput.className = "block-input";
-        newInput.value = oldInput.value || "";
         newInput.placeholder = `Enter ${BLOCK_TYPES[type].name.toLowerCase()}...`;
         newInput.dataset.blockInput = oldInput.dataset.blockInput;
 
-        // IMPORTANT: re-attach handlers (this was the big bug)
-        attachBlockInputHandlers(newInput, editor, block);
+        if (!fileType) {
+          newInput.value = oldInput.value || "";
+          // IMPORTANT: re-attach handlers (this was the big bug)
+          attachBlockInputHandlers(newInput, editor, block);
+        }
 
         block.replaceChild(newInput, oldInput);
       }
@@ -840,14 +894,52 @@
       function getBlocksData() {
         const editor = document.getElementById("articleBlockEditor");
         const blocks = [];
+        // Use creator types directly for consistency
+        const typeMapping = {
+          heading1: "heading1",
+          heading2: "heading2",
+          heading3: "heading3",
+          quote: "quote",
+          list: "list",
+          paragraph: "paragraph",
+          code: "code",
+          pdf: "pdf",
+        };
         editor.querySelectorAll(".block").forEach((block) => {
           const type = block.dataset.blockType;
           const input = block.querySelector(".block-input");
-          if (input && input.value.trim()) {
-            blocks.push({ type, data: input.value.trim() });
+          if (input) {
+            if (isFileType(type)) {
+              if (input.files && input.files[0]) {
+                blocks.push({
+                  type: typeMapping[type] || type,
+                  data: input.files[0].name, // Will be replaced by server filename
+                });
+              }
+            } else if (input.value.trim()) {
+              blocks.push({
+                type: typeMapping[type] || type,
+                data: input.value.trim(),
+              });
+            }
           }
         });
         return blocks;
+      }
+
+      function collectPdfFiles() {
+        const pdfFiles = [];
+        const editor = document.getElementById("articleBlockEditor");
+        editor.querySelectorAll(".block").forEach((block) => {
+          const type = block.dataset.blockType;
+          if (isFileType(type)) {
+            const input = block.querySelector(".block-input");
+            if (input && input.files && input.files[0]) {
+              pdfFiles.push(input.files[0]);
+            }
+          }
+        });
+        return pdfFiles;
       }
 
       // ===== CATEGORIES =====
@@ -922,12 +1014,33 @@
             article.date || ""
           ).split("T")[0];
 
-          // Blocks
+          // Blocks - map old types to new types for compatibility
           const editor = document.getElementById("articleBlockEditor");
           editor.innerHTML = "";
+          const typeMapping = {
+            subtitle: "heading1",
+            header: "heading2",
+            heading1: "heading1",
+            heading2: "heading2",
+            heading3: "heading3",
+            quote: "quote",
+            list: "list",
+            paragraph: "paragraph",
+            code: "code",
+            pdf: "pdf",
+          };
           (article.elements || []).forEach((element) => {
-            const b = addNewBlock(editor, element.type || "paragraph");
-            b.querySelector(".block-input").value = element.data || "";
+            // Skip image elements as they're not supported in the block editor
+            if (element.type === "image") return;
+            const mappedType = typeMapping[element.type] || "paragraph";
+            const b = addNewBlock(editor, mappedType);
+            const input = b.querySelector(".block-input");
+            if (mappedType === "pdf") {
+              // For PDF blocks, show filename as placeholder since we can't set file input value
+              input.placeholder = `Current: ${element.data || "No file selected"}`;
+            } else {
+              input.value = element.data || "";
+            }
           });
           if (editor.children.length === 0) addNewBlock(editor, "paragraph");
 
@@ -943,6 +1056,13 @@
             preview.src = article.imageURI;
             preview.style.display = "block";
           }
+
+          // Index checkbox
+          document.getElementById("articleIndexed").checked =
+            article.isIndexed ?? true;
+
+          // Show delete button
+          document.getElementById("deleteArticleBtn").style.display = "block";
         } catch (err) {
           showStatus("articleStatus", "Error loading article", "error");
         }
@@ -972,6 +1092,7 @@
         const slug = document.getElementById("articleSlug").value.trim();
         const date = document.getElementById("articleDate").value;
         const elements = getBlocksData();
+        const pdfFiles = collectPdfFiles();
 
         if (
           !title ||
@@ -982,20 +1103,6 @@
         ) {
           showStatus("articleStatus", "All fields are required", "error");
           return;
-        }
-
-        // If not editing, check if slug exists and set to edit that article
-        if (!currentArticleId) {
-          try {
-            const res = await fetch(`${API_URL}/article`);
-            const articles = await res.json();
-            const existingArticle = articles.find((a) => a.slug === slug);
-            if (existingArticle) {
-              currentArticleId = existingArticle._id;
-            }
-          } catch (err) {
-            console.error("Error checking existing articles:", err);
-          }
         }
 
         try {
@@ -1019,17 +1126,33 @@
             ? `article/${currentArticleId}`
             : "article/add";
 
+          const isIndexed = document.getElementById("articleIndexed").checked;
+
+          const formData = new FormData();
+          formData.append("title", title);
+          formData.append("slug", slug);
+          formData.append(
+            "imageURI",
+            imageURI || existingPreviewSrc || "default",
+          );
+          formData.append("date", date);
+          selectedCategories.forEach((cat) =>
+            formData.append("catagories", cat),
+          );
+          formData.append("elements", JSON.stringify(elements));
+          formData.append("isIndexed", isIndexed.toString());
+
+          if (selectedCoverImage) {
+            formData.append("imageFile", selectedCoverImage);
+          }
+
+          pdfFiles.forEach((file, index) => {
+            formData.append(`pdfFiles`, file);
+          });
+
           const res = await fetch(`${API_URL}/${endpoint}`, {
             method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title,
-              slug,
-              imageURI: imageURI || existingPreviewSrc,
-              date,
-              catagories: selectedCategories, // intentional spelling
-              elements,
-            }),
+            body: formData,
           });
 
           if (!res.ok) throw new Error("Publish failed");
@@ -1102,7 +1225,7 @@
           return;
         }
         try {
-          const res = await fetch(`${API_URL}/pages/${id}`);
+          const res = await fetch(`${API_URL}/pages/id/${id}`);
           const page = await res.json();
           currentPageId = page._id;
 
@@ -1118,10 +1241,17 @@
           } else {
             document.querySelector('input[value="text"]').checked = true;
             togglePageType();
-            document.getElementById("pageContent").value = (page.elements || [])
-              .map((e) => e.data)
-              .join("\n\n");
+            if (page.elements && Array.isArray(page.elements)) {
+              document.getElementById("pageContent").value = page.elements
+                .map((e) => e.data || "")
+                .join("\n\n");
+            } else {
+              document.getElementById("pageContent").value = "";
+            }
           }
+
+          // Show delete button
+          document.getElementById("deletePageBtn").style.display = "block";
         } catch (err) {
           showStatus("pageStatus", "Error loading page", "error");
         }
@@ -1161,20 +1291,6 @@
         if (!title || !slug) {
           showStatus("pageStatus", "Title and slug are required", "error");
           return;
-        }
-
-        // If not editing, check if slug exists and set to edit that page
-        if (!currentPageId) {
-          try {
-            const res = await fetch(`${API_URL}/pages`);
-            const pages = await res.json();
-            const existingPage = pages.find((p) => p.slug === slug);
-            if (existingPage) {
-              currentPageId = existingPage._id;
-            }
-          } catch (err) {
-            console.error("Error checking existing pages:", err);
-          }
         }
 
         try {
@@ -1260,18 +1376,65 @@
         currentPageId = null;
       }
 
+      async function deleteArticle() {
+        if (!currentArticleId) return;
+        if (!confirm("Are you sure you want to delete this article?")) return;
+
+        try {
+          const res = await fetch(`${API_URL}/article/${currentArticleId}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) throw new Error("Delete failed");
+
+          showStatus("articleStatus", "✅ Article deleted!", "success");
+          setTimeout(() => {
+            loadExistingArticles();
+            resetArticle();
+          }, 900);
+        } catch (err) {
+          showStatus("articleStatus", "Error: " + err.message, "error");
+        }
+      }
+
+      async function deletePage() {
+        if (!currentPageId) return;
+        if (!confirm("Are you sure you want to delete this page?")) return;
+
+        try {
+          const res = await fetch(`${API_URL}/pages/${currentPageId}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) throw new Error("Delete failed");
+
+          showStatus("pageStatus", "✅ Page deleted!", "success");
+          setTimeout(() => {
+            loadExistingPages();
+            resetPage();
+          }, 900);
+        } catch (err) {
+          showStatus("pageStatus", "Error: " + err.message, "error");
+        }
+      }
+
       function setTodaysDate() {
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("articleDate").value = today;
       }
 
       function setupAutoPopulate() {
-        // Auto-populate page fields when slug changes
+        // Auto-populate page fields when slug changes (only for new pages)
         document
           .getElementById("pageSlug")
           .addEventListener("input", async (e) => {
             const slug = e.target.value.trim();
-            if (!slug || currentPageId) return; // Don't auto-populate if already editing
+            // Only auto-populate if we're creating a new page (no currentPageId)
+            // and the select dropdown is set to "-- Create New --"
+            if (
+              !slug ||
+              currentPageId ||
+              document.getElementById("pageSelect").value !== ""
+            )
+              return;
 
             try {
               const res = await fetch(`${API_URL}/pages`);
@@ -1292,11 +1455,17 @@
                 } else {
                   document.querySelector('input[value="text"]').checked = true;
                   togglePageType();
-                  document.getElementById("pageContent").value = (
-                    existingPage.elements || []
-                  )
-                    .map((e) => e.data)
-                    .join("\n\n");
+                  if (
+                    existingPage.elements &&
+                    Array.isArray(existingPage.elements)
+                  ) {
+                    document.getElementById("pageContent").value =
+                      existingPage.elements
+                        .map((e) => e.data || "")
+                        .join("\n\n");
+                  } else {
+                    document.getElementById("pageContent").value = "";
+                  }
                 }
               }
             } catch (err) {

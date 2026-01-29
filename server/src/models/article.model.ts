@@ -3,6 +3,7 @@ import {
   type IElementBlock,
   type IArticle,
 } from "../../../shared/article.model.js";
+
 import { Catagory } from "./catagories.model.js";
 //Element (such as subtitle, header, bold, etc)
 
@@ -18,6 +19,7 @@ const articleSchema = new Schema<IArticle>({
   date: { type: Date, required: true, index: true },
   catagories: [{ type: Schema.Types.ObjectId, ref: "catagory", index: true }],
   elements: { type: [elementBlockSchema], required: true },
+  isIndexed: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now, index: true },
   updatedAt: { type: Date, default: Date.now },
 });

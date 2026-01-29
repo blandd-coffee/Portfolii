@@ -14,13 +14,11 @@ async function getAllPages(req: Request, res: Response) {
 
 async function getPageBySlug(req: Request, res: Response) {
   try {
-    const slug = Array.isArray(req.params.slug)
-      ? req.params.slug[0]
-      : req.params.slug;
+    const slug = req.params.slug;
     if (!slug) {
       return res.status(400).json({ error: "Slug is required" });
     }
-    const page = await Page.findOne({ slug } as any);
+    const page = await Page.findOne({ slug });
     if (!page) {
       return res.status(404).json({ error: "Page not found" });
     }
@@ -47,7 +45,7 @@ async function getPageById(req: Request, res: Response) {
 
 async function postPage(req: Request, res: Response) {
   try {
-    const { title, slug, imageURI, order, elements }: IPage = req.body;
+    let { title, slug, imageURI, order, elements }: IPage = req.body;
     let pdfFile = (req as any).file ? (req as any).file.filename : undefined;
 
     // Ensure we only store the filename, not the path
@@ -67,12 +65,19 @@ async function postPage(req: Request, res: Response) {
       }
     }
 
+    // Auto-assign order if not provided
+    let finalOrder = order;
+    if (finalOrder === undefined || finalOrder === null) {
+      const lastPage = await Page.findOne().sort({ order: -1 });
+      finalOrder = (lastPage?.order || 0) + 1;
+    }
+
     const page = new Page({
       title,
       slug,
       imageURI: imageURI || null,
       pdfFile: pdfFile || null,
-      order,
+      order: finalOrder,
       elements: parsedElements || [],
     });
     await page.save();

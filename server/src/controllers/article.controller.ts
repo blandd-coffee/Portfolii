@@ -43,13 +43,41 @@ async function postArticle(req: Request, res: Response) {
   try {
     const { title, slug, imageURI, date, catagories, elements }: IArticle =
       req.body;
+
+    let finalImageURI = imageURI;
+    if ((req as any).files?.imageFile?.[0]) {
+      finalImageURI = (req as any).files.imageFile[0].filename;
+    }
+
+    let parsedElements = elements;
+    if (typeof elements === "string") {
+      try {
+        parsedElements = JSON.parse(elements);
+      } catch (e) {
+        parsedElements = [];
+      }
+    }
+
+    // Assign PDF filenames to PDF elements
+    let pdfIndex = 0;
+    if (parsedElements && Array.isArray(parsedElements)) {
+      for (const el of parsedElements) {
+        if (el.type === "pdf") {
+          if ((req as any).files?.pdfFiles?.[pdfIndex]) {
+            el.data = (req as any).files.pdfFiles[pdfIndex].filename;
+            pdfIndex++;
+          }
+        }
+      }
+    }
+
     const article = new Article({
       slug,
       title,
-      imageURI,
+      imageURI: finalImageURI,
       date,
       catagories,
-      elements,
+      elements: parsedElements,
     });
     await article.save();
     res.status(201).json({ status: "Success!", data: article });
@@ -62,7 +90,48 @@ async function postArticle(req: Request, res: Response) {
 async function updateArticle(req: Request, res: Response) {
   try {
     const id = req.params.id as string;
-    const updates = req.body;
+    const updates: any = {};
+
+    // Handle form fields
+    if (req.body.title) updates.title = req.body.title;
+    if (req.body.slug) updates.slug = req.body.slug;
+    if (req.body.date) updates.date = req.body.date;
+    if (req.body.catagories) {
+      updates.catagories =
+        typeof req.body.catagories === "string"
+          ? JSON.parse(req.body.catagories)
+          : req.body.catagories;
+    }
+    if (req.body.elements) {
+      updates.elements =
+        typeof req.body.elements === "string"
+          ? JSON.parse(req.body.elements)
+          : req.body.elements;
+    }
+    if (req.body.isIndexed !== undefined) {
+      updates.isIndexed = req.body.isIndexed === "true";
+    }
+
+    // Handle image file
+    if ((req as any).files?.imageFile?.[0]) {
+      updates.imageURI = (req as any).files.imageFile[0].filename;
+    } else if (req.body.imageURI) {
+      updates.imageURI = req.body.imageURI;
+    }
+
+    // Handle PDF files - assign filenames to PDF elements
+    let pdfIndex = 0;
+    if (updates.elements && Array.isArray(updates.elements)) {
+      for (const el of updates.elements) {
+        if (el.type === "pdf") {
+          if ((req as any).files?.pdfFiles?.[pdfIndex]) {
+            el.data = (req as any).files.pdfFiles[pdfIndex].filename;
+            pdfIndex++;
+          }
+        }
+      }
+    }
+
     const article = await Article.findByIdAndUpdate(id, updates, {
       new: true,
     });
