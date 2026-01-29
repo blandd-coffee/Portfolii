@@ -1,5 +1,5 @@
 import type { IArticle } from "@shared/article.model";
-import axiosInstance from "../tools/axiosConfigs";
+import { getArticlesByCategory } from "../tools/axiosConfigs";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
@@ -19,9 +19,7 @@ export const CatagoryPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get(
-          `/catagories/${name}/articles`,
-        );
+        const response = await getArticlesByCategory(name);
         setArticles(response.data);
       } catch (err) {
         setError(

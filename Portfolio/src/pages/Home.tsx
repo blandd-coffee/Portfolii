@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import type { IArticle } from "@shared/article.model";
-import axiosInstance from "../tools/axiosConfigs";
+import axiosInstance, { getArticles } from "../tools/axiosConfigs";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
 
 export const Home = () => {
@@ -10,11 +10,11 @@ export const Home = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getArticles = async () => {
+    const getArticleArray = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get("/article");
+        const response = await getArticles();
         setArticles(response.data);
       } catch (err) {
         setError(
@@ -25,7 +25,7 @@ export const Home = () => {
         setLoading(false);
       }
     };
-    getArticles();
+    getArticleArray();
   }, []);
 
   return (

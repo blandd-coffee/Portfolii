@@ -1,5 +1,5 @@
 import type { IArticle } from "@shared/article.model";
-import axiosInstance, { API_BASE_URL } from "../tools/axiosConfigs";
+import { getArticle } from "../tools/axiosConfigs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
@@ -15,10 +15,11 @@ export const ArticlePage = () => {
 
   useEffect(() => {
     const fetchArticle = async () => {
+      if (!slug) return;
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get(`/article/${slug}`);
+        const response = await getArticle(slug);
         setArticle(response.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load article");
@@ -93,20 +94,14 @@ export const ArticlePage = () => {
               if (element.type === "pdf")
                 return (
                   <div key={idx} className="my-4">
-                    <iframe
-                      src={`${pdfBaseUrl}/uploads/${element.data}`}
-                      className="w-full h-96 border border-gray-300 rounded-lg"
-                      title="PDF Document"
-                    />
-                    <div className="mt-2 text-center">
-                      <a
-                        href={`${pdfBaseUrl}/uploads/${element.data}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline text-sm"
-                      >
-                        Open PDF in new tab
-                      </a>
+                    {/* Use h-screen or h-dvh for full viewport height */}
+                    <div className="w-full h-screen border border-gray-300 rounded-lg overflow-hidden">
+                      <iframe
+                        // Use & to combine parameters (view=FitH scales the width automatically)
+                        src={`${pdfBaseUrl}/uploads/${element.data}#view=FitH&toolbar=0`}
+                        className="w-full h-full"
+                        title="Full Screen PDF Viewer"
+                      />
                     </div>
                   </div>
                 );

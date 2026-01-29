@@ -97,16 +97,26 @@ async function updateArticle(req: Request, res: Response) {
     if (req.body.slug) updates.slug = req.body.slug;
     if (req.body.date) updates.date = req.body.date;
     if (req.body.catagories) {
-      updates.catagories =
-        typeof req.body.catagories === "string"
-          ? JSON.parse(req.body.catagories)
-          : req.body.catagories;
+      if (typeof req.body.catagories === "string") {
+        try {
+          updates.catagories = JSON.parse(req.body.catagories);
+        } catch (e) {
+          updates.catagories = [];
+        }
+      } else {
+        updates.catagories = req.body.catagories;
+      }
     }
     if (req.body.elements) {
-      updates.elements =
-        typeof req.body.elements === "string"
-          ? JSON.parse(req.body.elements)
-          : req.body.elements;
+      if (typeof req.body.elements === "string") {
+        try {
+          updates.elements = JSON.parse(req.body.elements);
+        } catch (e) {
+          updates.elements = [];
+        }
+      } else {
+        updates.elements = req.body.elements;
+      }
     }
     if (req.body.isIndexed !== undefined) {
       updates.isIndexed = req.body.isIndexed === "true";

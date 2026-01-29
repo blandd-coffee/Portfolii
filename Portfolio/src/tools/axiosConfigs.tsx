@@ -23,5 +23,15 @@ axiosInstance.interceptors.response.use(
   },
 );
 
+// API route functions
+export const getArticles = () => axiosInstance.get("/article");
+export const getArticle = (slug: string) =>
+  axiosInstance.get(`/article/${slug}`);
+export const getCategories = () => axiosInstance.get("/catagories");
+export const getArticlesByCategory = (name: string) =>
+  axiosInstance.get(`/catagories/${name}/articles`);
+export const getPages = () => axiosInstance.get("/pages");
+export const getPage = (slug: string) => axiosInstance.get(`/pages/${slug}`);
+
 export default axiosInstance;
 export { API_BASE_URL };

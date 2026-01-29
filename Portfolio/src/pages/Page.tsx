@@ -1,4 +1,4 @@
-import axios from "axios";
+import { getPage } from "../tools/axiosConfigs";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardTitle } from "../components/ui/card";
@@ -9,8 +9,9 @@ export const Page = () => {
 
   useEffect(() => {
     const fetchPage = async () => {
+      if (!slug) return;
       try {
-        const response = await axios.get("/api/pages/" + slug);
+        const response = await getPage(slug);
         setPage(response.data);
       } catch (err) {
         console.error("Failed to fetch page:", err);
@@ -43,14 +44,17 @@ export const Page = () => {
 
     return (
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardTitle className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100">
+        <Card className="overflow">
+          {" "}
+          {/* Added overflow-hidden for rounded corners */}
+          <CardTitle className="p-6 text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
             {page?.title}
           </CardTitle>
-          <CardContent className="p-6">
+          {/* Removed p-6 to let the PDF fill the card width entirely */}
+          <CardContent className="p-0">
             <iframe
-              src={`${fullPdfUrl}#toolbar=1`}
-              className="w-full h-screen rounded-lg border border-cyan-200"
+              src={`${fullPdfUrl}#toolbar=0&view=FitH`}
+              className="w-full h-screen border-none"
               title={page?.title}
             />
           </CardContent>

@@ -1,4 +1,4 @@
-import axiosInstance from "../tools/axiosConfigs";
+import { getCategories } from "../tools/axiosConfigs";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -18,7 +18,7 @@ export const Catagories = ({ sidebar }: { sidebar?: boolean }) => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get("/catagories/");
+        const response = await getCategories();
         setCatagories(response.data);
       } catch (err) {
         setError(
