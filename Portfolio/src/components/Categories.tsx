@@ -4,11 +4,12 @@ import { Button } from "./ui/button";
 import { useAsync } from "../hooks/useAsync";
 
 export const Categories = ({ sidebar }: { sidebar?: boolean }) => {
-  const { data: categories = [], loading, error } = useAsync<Category[]>(
+  const { data, loading, error } = useAsync<Category[]>(
     () => fetchCategories(),
     [],
     { initialData: [], errorMessage: "Failed to load categories" },
   );
+  const categories = data ?? [];
 
   if (loading) {
     return (

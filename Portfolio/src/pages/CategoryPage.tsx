@@ -6,7 +6,7 @@ import { useAsync } from "../hooks/useAsync";
 
 export const CategoryPage = () => {
   const { name } = useParams();
-  const { data: articles = [], loading, error } = useAsync<IArticle[]>(
+  const { data, loading, error } = useAsync<IArticle[]>(
     () => fetchArticlesByCategory(name ?? ""),
     [name],
     {
@@ -15,6 +15,7 @@ export const CategoryPage = () => {
       errorMessage: "Failed to load articles",
     },
   );
+  const articles = data ?? [];
 
   return (
     <div className="min-w-min m-10 border bg-white p-6">

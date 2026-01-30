@@ -5,6 +5,9 @@ type ContentBlocksProps = {
   elements?: IElementBlock[];
 };
 
+const asString = (value: string | string[]) =>
+  Array.isArray(value) ? value[0] ?? "" : value;
+
 export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
   <>
     {elements.map((element, idx) => {
@@ -59,7 +62,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         );
       }
       if (element.type === "image") {
-        const imageUrl = getUploadUrl(element.data);
+        const imageUrl = getUploadUrl(asString(element.data));
         return (
           <div key={idx} className="my-4">
             <img
@@ -72,7 +75,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         );
       }
       if (element.type === "pdf") {
-        const pdfUrl = getUploadUrl(element.data);
+        const pdfUrl = getUploadUrl(asString(element.data));
         return (
           <div key={idx} className="my-4">
             <div className="w-full h-screen border border-gray-300 rounded-lg overflow-hidden">

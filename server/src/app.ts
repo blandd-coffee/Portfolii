@@ -43,7 +43,8 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Serve uploaded files statically
-app.use("/uploads", express.static("uploads"));
+const uploadsDir = process.env.UPLOADS_DIR || "uploads";
+app.use("/uploads", express.static(uploadsDir));
 
 const BASE_API_ROUTE = process.env.BASE_API_ROUTE || "/api";
 

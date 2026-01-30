@@ -5,11 +5,12 @@ import { ArticlePreview } from "../components/ArticlePreview";
 import { useAsync } from "../hooks/useAsync";
 
 export const Home = () => {
-  const { data: articles = [], loading, error } = useAsync<IArticle[]>(
+  const { data, loading, error } = useAsync<IArticle[]>(
     () => fetchArticles(),
     [],
     { initialData: [], errorMessage: "Failed to load articles" },
   );
+  const articles = data ?? [];
 
   return (
     <div className="flex flex-wrap gap-6 justify-center p-6">

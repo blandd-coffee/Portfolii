@@ -15,11 +15,12 @@ interface IPage {
 export const Layout = () => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
-  const { data: pages = [] } = useAsync<IPage[]>(
+  const { data } = useAsync<IPage[]>(
     () => fetchPages(),
     [],
     { initialData: [] },
   );
+  const pages = data ?? [];
 
   // Show loading bar on route change
   useEffect(() => {
