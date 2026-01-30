@@ -1,8 +1,9 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axiosInstance from "../tools/axiosConfigs";
+import { fetchPages } from "../api";
 import { Button } from "./ui/button";
-import { Catagories } from "./Catagories";
+import { Categories } from "./Categories";
+import { useAsync } from "../hooks/useAsync";
 
 interface IPage {
   _id: string;
@@ -12,21 +13,13 @@ interface IPage {
 }
 
 export const Layout = () => {
-  const [pages, setPages] = useState<IPage[]>([]);
   const [loading, setLoading] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const response = await axiosInstance.get("/pages");
-        setPages(response.data);
-      } catch (err) {
-        console.error("Failed to fetch pages:", err);
-      }
-    };
-    fetchPages();
-  }, []);
+  const { data: pages = [] } = useAsync<IPage[]>(
+    () => fetchPages(),
+    [],
+    { initialData: [] },
+  );
 
   // Show loading bar on route change
   useEffect(() => {
@@ -108,7 +101,7 @@ export const Layout = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4 mt-8">
             Categories
           </h3>
-          <Catagories sidebar />
+          <Categories sidebar />
         </aside>
       </div>
       <footer className="bg-slate-800 text-gray-200 py-8 px-5 mt-auto">

@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import { Page } from "../models/page.model.js";
 import type { IPage } from "../../../shared/page.model.js";
+import { applyElementUploads, parseElements } from "../utils/elements.js";
 
 async function getAllPages(req: Request, res: Response) {
   try {
@@ -46,24 +47,16 @@ async function getPageById(req: Request, res: Response) {
 async function postPage(req: Request, res: Response) {
   try {
     let { title, slug, imageURI, order, elements }: IPage = req.body;
-    let pdfFile = (req as any).file ? (req as any).file.filename : undefined;
+    const files = (req as any).files;
+    let pdfFile = files?.pdfFile?.[0]?.filename;
+    let finalImageURI = imageURI ?? null;
 
-    // Ensure we only store the filename, not the path
-    if (pdfFile && pdfFile.includes("/")) {
-      pdfFile = pdfFile.split("/").pop();
-    }
-    if (pdfFile && pdfFile.includes("\\")) {
-      pdfFile = pdfFile.split("\\").pop();
+    if (files?.imageFile?.[0]) {
+      finalImageURI = files.imageFile[0].filename;
     }
 
-    let parsedElements = elements;
-    if (typeof elements === "string") {
-      try {
-        parsedElements = JSON.parse(elements);
-      } catch (e) {
-        parsedElements = [];
-      }
-    }
+    let parsedElements = parseElements(elements);
+    parsedElements = applyElementUploads(parsedElements, files);
 
     // Auto-assign order if not provided
     let finalOrder = order;
@@ -75,7 +68,7 @@ async function postPage(req: Request, res: Response) {
     const page = new Page({
       title,
       slug,
-      imageURI: imageURI || null,
+      imageURI: finalImageURI,
       pdfFile: pdfFile || null,
       order: finalOrder,
       elements: parsedElements || [],
@@ -95,25 +88,23 @@ async function updatePage(req: Request, res: Response) {
     const updates: Partial<IPage> = req.body;
 
     // Handle file upload
-    if ((req as any).file) {
-      let pdfFile = (req as any).file.filename;
-      // Ensure we only store the filename, not the path
-      if (pdfFile.includes("/")) {
-        pdfFile = pdfFile.split("/").pop() || pdfFile;
-      }
-      if (pdfFile.includes("\\")) {
-        pdfFile = pdfFile.split("\\").pop() || pdfFile;
-      }
-      updates.pdfFile = pdfFile;
+    const files = (req as any).files;
+    if (files?.pdfFile?.[0]) {
+      updates.pdfFile = files.pdfFile[0].filename;
+    }
+    if (files?.imageFile?.[0]) {
+      updates.imageURI = files.imageFile[0].filename;
     }
 
     // Parse elements if it's a string
     if (typeof updates.elements === "string") {
-      try {
-        updates.elements = JSON.parse(updates.elements);
-      } catch (e) {
-        updates.elements = [];
-      }
+      updates.elements = parseElements(updates.elements);
+    } else if (updates.elements) {
+      updates.elements = parseElements(updates.elements);
+    }
+
+    if (updates.elements && Array.isArray(updates.elements)) {
+      updates.elements = applyElementUploads(updates.elements, files);
     }
 
     const page = await Page.findByIdAndUpdate(id, updates, { new: true });

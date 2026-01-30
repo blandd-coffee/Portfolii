@@ -9,7 +9,7 @@ import { Catagory } from "./catagories.model.js";
 
 const elementBlockSchema = new Schema<IElementBlock>({
   type: { type: String, required: true },
-  data: { type: String, required: true },
+  data: { type: Schema.Types.Mixed, required: true },
 });
 
 const articleSchema = new Schema<IArticle>({

@@ -1,12 +1,11 @@
 import { type Response, type Request } from "express";
 import { Article } from "../models/article.model.js";
 import { type IArticle } from "../../../shared/article.model.js";
+import { applyElementUploads, parseElements } from "../utils/elements.js";
 
 async function getAllArticle(req: Request, res: Response) {
   try {
     const articles = await Article.find();
-    if (!articles[0])
-      return res.status(404).json({ error: "Unable to find article" });
     res.status(200).json(articles);
   } catch (err) {
     console.error(err);
@@ -49,27 +48,8 @@ async function postArticle(req: Request, res: Response) {
       finalImageURI = (req as any).files.imageFile[0].filename;
     }
 
-    let parsedElements = elements;
-    if (typeof elements === "string") {
-      try {
-        parsedElements = JSON.parse(elements);
-      } catch (e) {
-        parsedElements = [];
-      }
-    }
-
-    // Assign PDF filenames to PDF elements
-    let pdfIndex = 0;
-    if (parsedElements && Array.isArray(parsedElements)) {
-      for (const el of parsedElements) {
-        if (el.type === "pdf") {
-          if ((req as any).files?.pdfFiles?.[pdfIndex]) {
-            el.data = (req as any).files.pdfFiles[pdfIndex].filename;
-            pdfIndex++;
-          }
-        }
-      }
-    }
+    let parsedElements = parseElements(elements);
+    parsedElements = applyElementUploads(parsedElements, (req as any).files);
 
     const article = new Article({
       slug,
@@ -108,15 +88,7 @@ async function updateArticle(req: Request, res: Response) {
       }
     }
     if (req.body.elements) {
-      if (typeof req.body.elements === "string") {
-        try {
-          updates.elements = JSON.parse(req.body.elements);
-        } catch (e) {
-          updates.elements = [];
-        }
-      } else {
-        updates.elements = req.body.elements;
-      }
+      updates.elements = parseElements(req.body.elements);
     }
     if (req.body.isIndexed !== undefined) {
       updates.isIndexed = req.body.isIndexed === "true";
@@ -129,17 +101,11 @@ async function updateArticle(req: Request, res: Response) {
       updates.imageURI = req.body.imageURI;
     }
 
-    // Handle PDF files - assign filenames to PDF elements
-    let pdfIndex = 0;
     if (updates.elements && Array.isArray(updates.elements)) {
-      for (const el of updates.elements) {
-        if (el.type === "pdf") {
-          if ((req as any).files?.pdfFiles?.[pdfIndex]) {
-            el.data = (req as any).files.pdfFiles[pdfIndex].filename;
-            pdfIndex++;
-          }
-        }
-      }
+      updates.elements = applyElementUploads(
+        updates.elements,
+        (req as any).files,
+      );
     }
 
     const article = await Article.findByIdAndUpdate(id, updates, {

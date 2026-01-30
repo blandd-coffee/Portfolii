@@ -29,7 +29,12 @@ async function getArticlesByCatagory(req: Request, res: Response) {
 async function postCatagory(req: Request, res: Response) {
   try {
     const { name, imageURI }: ICatagory = req.body;
-    const catagory = new Catagory({ name, imageURI });
+    let finalImageURI = imageURI;
+    if ((req as any).file) {
+      finalImageURI = (req as any).file.filename;
+    }
+
+    const catagory = new Catagory({ name, imageURI: finalImageURI });
     await catagory.save();
 
     res.status(201).json({ status: "Success!", data: catagory });

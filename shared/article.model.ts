@@ -13,7 +13,7 @@ export interface IElementBlock {
     | "header"
     | "image"
     | "pdf";
-  data: string;
+  data: string | string[];
 }
 
 export interface IArticle {

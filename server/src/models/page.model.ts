@@ -3,7 +3,7 @@ import type { IPage } from "../../../shared/page.model.js";
 
 const elementBlockSchema = new Schema({
   type: { type: String, required: true },
-  data: { type: String, required: true },
+  data: { type: Schema.Types.Mixed, required: true },
 });
 
 const pageSchema = new Schema<IPage>({

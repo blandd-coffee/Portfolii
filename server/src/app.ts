@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, type Response } from "express";
 import connectDB from "./database/connection.js";
 import cors from "cors";
@@ -44,9 +45,11 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Serve uploaded files statically
 app.use("/uploads", express.static("uploads"));
 
-app.use("/api/article", articleRouter);
-app.use("/api/catagories", catagoryRouter);
-app.use("/api/pages", pageRouter);
+const BASE_API_ROUTE = process.env.BASE_API_ROUTE || "/api";
+
+app.use(`${BASE_API_ROUTE}/article`, articleRouter);
+app.use(`${BASE_API_ROUTE}/catagories`, catagoryRouter);
+app.use(`${BASE_API_ROUTE}/pages`, pageRouter);
 
 const PORT: number = Number(process.env.PORT) || 3000;
 app.listen(PORT, () => {
