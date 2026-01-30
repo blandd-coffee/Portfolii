@@ -17,9 +17,9 @@ export const Page = () => {
     const fullPdfUrl = getUploadUrl(page.pdfFile);
 
     return (
-      <div className="max-w-4xl mx-auto">
-        <Card className="overflow-hidden">
-          <CardTitle className="p-6 text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+      <div className="max-w-5xl mx-auto">
+        <Card className="overflow-hidden border-emerald-900/50 shadow-xl rounded-3xl bg-slate-950/70">
+          <CardTitle className="p-6 text-3xl md:text-4xl font-semibold text-emerald-50 bg-gradient-to-r from-emerald-900/60 to-transparent border-b border-emerald-900/40">
             {page?.title}
           </CardTitle>
           <CardContent className="p-0">
@@ -35,7 +35,7 @@ export const Page = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       {loading && (
         <div className="text-center py-8 text-gray-500">Loading page...</div>
       )}
@@ -43,11 +43,11 @@ export const Page = () => {
         <div className="text-center py-8 text-red-500">Error: {error}</div>
       )}
       {!loading && !error && page && (
-        <Card>
-          <CardTitle className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100">
+        <Card className="border-emerald-900/50 shadow-xl rounded-3xl bg-slate-950/70">
+          <CardTitle className="text-3xl md:text-4xl font-semibold text-emerald-50 bg-gradient-to-r from-emerald-900/60 to-transparent border-emerald-900/40">
             {page?.title}
           </CardTitle>
-          <CardContent className="prose prose-sm">
+          <CardContent className="px-6 sm:px-8 py-8 sm:py-10 text-[15px] leading-relaxed text-emerald-50/90">
             <ContentBlocks elements={page?.elements} />
           </CardContent>
         </Card>

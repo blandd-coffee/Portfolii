@@ -9,9 +9,11 @@ const Button = React.forwardRef<
   }
 >(({ className, variant = "default", size = "default", ...props }, ref) => {
   const variants = {
-    default: "bg-cyan-600 text-white hover:bg-cyan-700 border border-cyan-500",
-    outline: "border-2 border-cyan-600 text-cyan-700 hover:bg-cyan-50 bg-white",
-    ghost: "hover:bg-gray-100 text-gray-700",
+    default:
+      "bg-emerald-500 text-emerald-950 hover:bg-emerald-400 border border-emerald-500",
+    outline:
+      "border-2 border-emerald-400/70 text-emerald-100 hover:bg-emerald-900/40 bg-transparent",
+    ghost: "hover:bg-emerald-900/30 text-emerald-100",
   };
   const sizes = {
     default: "px-4 py-2",

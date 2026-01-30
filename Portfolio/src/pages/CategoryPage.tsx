@@ -18,8 +18,16 @@ export const CategoryPage = () => {
   const articles = data ?? [];
 
   return (
-    <div className="min-w-min m-10 border bg-white p-6">
-      <h1 className="font-bold text-3xl pb-4">Articles in "{name}"</h1>
+    <div className="max-w-5xl mx-auto bg-slate-950/70 border border-emerald-900/50 rounded-3xl shadow-lg p-6 sm:p-8">
+      <p className="text-xs uppercase tracking-[0.3em] text-emerald-300">
+        Category
+      </p>
+      <h1 className="font-semibold text-3xl text-emerald-50 pb-2">
+        Articles in "{name}"
+      </h1>
+      <p className="text-sm text-emerald-100/70 pb-6">
+        Browse all entries tagged with this category.
+      </p>
       {loading && (
         <div className="text-center py-8 text-gray-500">
           Loading articles...

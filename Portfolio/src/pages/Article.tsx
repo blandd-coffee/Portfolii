@@ -14,7 +14,7 @@ export const ArticlePage = () => {
   );
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       {loading && (
         <div className="text-center py-8 text-gray-500">Loading article...</div>
       )}
@@ -22,11 +22,11 @@ export const ArticlePage = () => {
         <div className="text-center py-8 text-red-500">Error: {error}</div>
       )}
       {!loading && !error && article && (
-        <Card>
-          <CardTitle className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-gray-50 to-gray-100">
+        <Card className="border-emerald-900/50 shadow-xl rounded-3xl bg-slate-950/70">
+          <CardTitle className="text-3xl md:text-4xl font-semibold text-emerald-50 bg-gradient-to-r from-emerald-900/60 to-transparent border-emerald-900/40">
             {article.title}
           </CardTitle>
-          <CardContent className="prose prose-sm">
+          <CardContent className="px-6 sm:px-8 py-8 sm:py-10 text-[15px] leading-relaxed text-emerald-50/90">
             <ContentBlocks elements={article.elements} />
           </CardContent>
         </Card>

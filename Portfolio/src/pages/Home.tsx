@@ -13,7 +13,19 @@ export const Home = () => {
   const articles = data ?? [];
 
   return (
-    <div className="flex flex-wrap gap-6 justify-center p-6">
+    <section className="space-y-6">
+      <div className="rounded-3xl border border-emerald-900/50 bg-slate-950/70 shadow-sm p-6">
+        <p className="text-xs uppercase tracking-[0.3em] text-emerald-300">
+          Latest
+        </p>
+        <h2 className="text-2xl font-semibold text-emerald-50">
+          Featured articles
+        </h2>
+        <p className="text-sm text-emerald-100/70">
+          Fresh writing and research curated for quick scanning.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-6 justify-center">
       {loading && (
         <div className="text-center w-full py-8 text-gray-500">
           Loading articles...
@@ -36,6 +48,7 @@ export const Home = () => {
             <ArticlePreview {...article} />
           </Link>
         ))}
-    </div>
+      </div>
+    </section>
   );
 };

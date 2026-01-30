@@ -15,7 +15,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         return (
           <h2
             key={idx}
-            className="text-2xl font-semibold border-b border-cyan-200 pb-4 mt-6 text-gray-900"
+            className="text-2xl font-semibold border-b border-emerald-700/50 pb-3 mt-8 text-emerald-50"
           >
             {element.data}
           </h2>
@@ -27,14 +27,14 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         element.type === "header"
       ) {
         return (
-          <h3 key={idx} className="text-xl font-semibold mt-4 text-gray-800">
+          <h3 key={idx} className="text-xl font-semibold mt-6 text-emerald-100">
             {element.data}
           </h3>
         );
       }
       if (element.type === "paragraph" || element.type === "quote") {
         return (
-          <p key={idx} className="text-gray-700 my-3">
+          <p key={idx} className="text-emerald-50/80 my-4 leading-relaxed">
             {element.data}
           </p>
         );
@@ -43,7 +43,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         return (
           <pre
             key={idx}
-            className="bg-gray-100 text-gray-900 p-4 rounded-lg overflow-x-auto my-4 text-sm leading-relaxed font-mono border border-cyan-200"
+            className="bg-black/80 text-emerald-200 p-5 rounded-xl overflow-x-auto my-6 text-sm leading-relaxed font-mono border border-emerald-400/40 shadow-inner"
           >
             {element.data}
           </pre>
@@ -54,7 +54,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
           ? element.data
           : [element.data];
         return (
-          <ul key={idx} className="list-disc pl-6 my-3">
+          <ul key={idx} className="list-disc pl-6 my-4 text-emerald-50/80">
             {items.map((item, itemIdx) => (
               <li key={`${idx}-${itemIdx}`}>{item}</li>
             ))}
@@ -64,11 +64,11 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
       if (element.type === "image") {
         const imageUrl = getUploadUrl(asString(element.data));
         return (
-          <div key={idx} className="my-4">
+          <div key={idx} className="my-6">
             <img
               src={imageUrl}
               alt="Content"
-              className="w-full rounded-lg border border-gray-200"
+              className="w-full rounded-2xl border border-emerald-900/50 shadow-sm"
               loading="lazy"
             />
           </div>
@@ -78,7 +78,7 @@ export const ContentBlocks = ({ elements = [] }: ContentBlocksProps) => (
         const pdfUrl = getUploadUrl(asString(element.data));
         return (
           <div key={idx} className="my-4">
-            <div className="w-full h-screen border border-gray-300 rounded-lg overflow-hidden">
+            <div className="w-full h-screen border border-emerald-900/50 rounded-2xl overflow-hidden shadow-sm">
               <iframe
                 src={`${pdfUrl}#view=FitH&toolbar=0`}
                 className="w-full h-full"
